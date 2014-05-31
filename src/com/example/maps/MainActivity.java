@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -27,6 +28,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.Overlay;
 
+import android.R.bool;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBar;
 import android.support.v4.app.Fragment;
@@ -42,11 +44,8 @@ import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
+import android.view.*;
+import android.widget.Toast;
 import android.os.Build;
 import android.provider.DocumentsContract.Document;
 
@@ -61,6 +60,11 @@ public class MainActivity extends FragmentActivity {
     GMapV2GetRouteDirection v2GetRouteDirection;
     LatLng fromPosition;
     LatLng toPosition;
+    LatLng home;
+    String homeFalse = "false";
+    LatLng university;
+    String universityFalse= "false";
+    
     ArrayList<LatLng> markerPoints;
     
     GoogleMap mGoogleMap;
@@ -88,37 +92,45 @@ public class MainActivity extends FragmentActivity {
           mGoogleMap.setTrafficEnabled(true);
           mGoogleMap.animateCamera(CameraUpdateFactory.zoomTo(12));
           markerOptions = new MarkerOptions();
-          //fromPosition = new LatLng(-17.433737, -66.160973);
-          //toPosition = new LatLng(-17.438057, -66.159256);
-          //GetRouteTask getRoute = new GetRouteTask();
-          //getRoute.execute();
-          
           
           mGoogleMap.setOnMapClickListener(new OnMapClickListener() {
 				
+        	  
 				@Override
 				public void onMapClick(LatLng point) 
 				{
-					// Already two locations				
+					if(homeFalse == "llenar")
+					{
+						markerPoints.clear();
+						mGoogleMap.clear();
+						home = point;
+						MarkerOptions options = new MarkerOptions();
+						options.position(point);
+						options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
+						mGoogleMap.addMarker(options);
+						homeFalse = "oto";
+						
+						ayudaServicios servicios = new ayudaServicios();
+						servicios.guardarPunto("nose", "garcia", home.latitude,home.longitude);
+						return;
+					}
+					// tam 2 o mayor LIMPIAR			
 					if(markerPoints.size()>1)
 					{
 						markerPoints.clear();
 						mGoogleMap.clear();					
 					}
+					// adicionar punto
+					markerPoints.add(point);
 					
-					// Adding new item to the ArrayList
-					markerPoints.add(point);				
 					
-					// Creating MarkerOptions
+					// crear MarkerOptions
 					MarkerOptions options = new MarkerOptions();
 					
-					// Setting the position of the marker
+					// ajustar la pos del marker
 					options.position(point);
 					
-					/** 
-					 * For the start location, the color of marker is GREEN and
-					 * for the end location, the color of marker is RED.
-					 */
+					//color marker
 					if(markerPoints.size()==1)
 					{
 						options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
@@ -129,37 +141,26 @@ public class MainActivity extends FragmentActivity {
 							options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
 						}
 								
-					
-					// Add new marker to the Google Map Android API V2
+					// Add marker al map
 					mGoogleMap.addMarker(options);
 					
 					// Checks, whether start and end locations are captured
-					if(markerPoints.size() >= 2){					
+					if(markerPoints.size() >= 2)
+					{					
 						fromPosition = markerPoints.get(0);
 						toPosition = markerPoints.get(1);
 						
 						GetRouteTask getRoute = new GetRouteTask();
 				        getRoute.execute();
-						
-						// Getting URL to the Google Directions API
-							//String url = getDirectionsUrl(origin, dest);				
-						
-							//DownloadTask downloadTask = new DownloadTask();
-						
-						// Start downloading json data from Google Directions API
-							//downloadTask.execute(url);
 					}
-					
 				}
 			});
-          
-          
     }
-    
- 		
+    	
 //000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 
-    private class GetRouteTask extends AsyncTask<String, Void, String> {
+    private class GetRouteTask extends AsyncTask<String, Void, String> 
+    {
         
         private ProgressDialog Dialog;
         String response = "";
@@ -200,7 +201,8 @@ public class MainActivity extends FragmentActivity {
              
               Dialog.dismiss();
         }
-  }
+  }  
+    
   @Override
   protected void onStop() {
         super.onStop();
@@ -218,14 +220,43 @@ public class MainActivity extends FragmentActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-        if (id == R.id.action_settings) {
-            return true;
-        }
+    	switch (item.getItemId()) {
+		case R.id.item1:
+			Toast.makeText(getApplicationContext(), "problemas permanentes", 3000).show();
+			break;
+		case R.id.item2:
+			Toast.makeText(getApplicationContext(), "problemas pasajeros", 3000).show();
+			break;	
+
+		default:
+			break;
+		}
+          
         return super.onOptionsItemSelected(item);
     }
+    public void onClickAddPoint(View view) {
+    	if(homeFalse == "false")
+    	{
+    		Toast.makeText(this,"Seleccione un punto para HOME", Toast.LENGTH_LONG).show();
+    		homeFalse = "llenar";
+    	}
+    	else
+    	{
+    		if (homeFalse == "oto") {
+    			Toast.makeText(this,"camino a home", Toast.LENGTH_LONG).show();
+    			//"nose", "garcia"
+    			double latitude = mGoogleMap.getMyLocation().getLatitude();
+    			double longitude = mGoogleMap.getMyLocation().getLongitude();
+    			LatLng Position = new LatLng(latitude, longitude);
+    			fromPosition = Position;
+    			toPosition = home;
+				
+				GetRouteTask getRoute = new GetRouteTask();
+		        getRoute.execute();
+			}
+    		
+    	}
+		
+	}
 
 }

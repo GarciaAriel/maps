@@ -303,10 +303,10 @@ int id action_context_bar 0x7f060020
 int id action_menu_divider 0x7f060019
 int id action_menu_presenter 0x7f06001a
 int id action_mode_close_button 0x7f060027
-int id action_settings 0x7f060040
 int id activity_chooser_view_content 0x7f060028
 int id always 0x7f06000f
 int id beginning 0x7f060014
+int id button1 0x7f060040
 int id checkbox 0x7f060030
 int id collapseActionView 0x7f060011
 int id default_activity_button 0x7f06002b
@@ -323,6 +323,8 @@ int id hybrid 0x7f060004
 int id icon 0x7f06002d
 int id ifRoom 0x7f06000e
 int id image 0x7f06002a
+int id item1 0x7f060041
+int id item2 0x7f060042
 int id listMode 0x7f060005
 int id list_item 0x7f06002c
 int id map 0x7f06003f
