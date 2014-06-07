@@ -1,57 +1,62 @@
 package com.example.maps;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
 
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesUtil;
+
+import com.entropy.slidingmenu2.fragment.FragmentListView;
+import com.entropy.slidingmenu2.fragment.FragmentMain;
+import com.entropy.slidingmenu2.layout.MainLayout;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.GoogleMap.OnMapClickListener;
-import com.google.android.gms.maps.model.LatLng;
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.Overlay;
 
-import android.R.bool;
-import android.support.v7.app.ActionBarActivity;
-import android.support.v7.app.ActionBar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
-import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.*;
+import android.view.View.OnClickListener;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
-import android.os.Build;
-import android.provider.DocumentsContract.Document;
+import android.widget.AdapterView.OnItemClickListener;
 
 
 public class MainActivity extends FragmentActivity {
 	
+	// The MainLayout which will hold both the sliding menu and our main content
+    // Main content will holds our Fragment respectively
+    MainLayout mainLayout;
+    
+    // ListView menu
+    private ListView lvMenu;
+    private String[] lvMenuItems;
+    
+    // Menu button
+    Button btMenu;
+    
+    // Title according to fragment
+    TextView tvTitle;
+	//=============================================
 	List<Overlay> mapOverlays;
     GeoPoint point1, point2;
     LocationManager locManager;
@@ -75,10 +80,50 @@ public class MainActivity extends FragmentActivity {
     protected void onCreate(Bundle savedInstanceState) 
     {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        mainLayout = (MainLayout)this.getLayoutInflater().inflate(R.layout.activity_main, null);//new
+        setContentView(mainLayout);//new
+        //setContentView(R.layout.activity_main1); 
+        
+     // Init menu
+        lvMenuItems = getResources().getStringArray(R.array.menu_items);
+        lvMenu = (ListView) findViewById(R.id.activity_main_menu_listview);
+        lvMenu.setAdapter(new ArrayAdapter<String>(this,
+                android.R.layout.simple_list_item_1, lvMenuItems));
+        lvMenu.setOnItemClickListener(new OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                onMenuItemClick(parent, view, position, id);
+            }
+            
+        });
+        
+     // Get menu button
+        btMenu = (Button) findViewById(R.id.activity_main_content_button_menu);
+        btMenu.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Show/hide the menu
+                toggleMenu(v);
+            }
+        });
+        
+        // Get title textview
+        tvTitle = (TextView) findViewById(R.id.activity_main_content_title);
+        
+        
+        // Add FragmentMain as the initial fragment       
+        FragmentManager fm = MainActivity.this.getSupportFragmentManager();
+        FragmentTransaction ft = fm.beginTransaction();
+//        
+//        FragmentMain fragment = new FragmentMain();
+//        ft.add(R.id.activity_main_content_fragment, fragment);
+//        ft.commit();
+        
+      //================================================
+        
         
         markerPoints = new ArrayList<LatLng>();
-        
+//        
         v2GetRouteDirection = new GMapV2GetRouteDirection();
         SupportMapFragment supportMapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
           mGoogleMap = supportMapFragment.getMap();
@@ -258,5 +303,56 @@ public class MainActivity extends FragmentActivity {
     	}
 		
 	}
+    // MENU ==============================================================
+    
 
+    public void toggleMenu(View v){
+        mainLayout.toggleMenu();
+    }
+    
+    private void onMenuItemClick(AdapterView<?> parent, View view, int position, long id) {
+        String selectedItem = lvMenuItems[position];
+        String currentItem = tvTitle.getText().toString();
+        
+        // Do nothing if selectedItem is currentItem
+        if(selectedItem.compareTo(currentItem) == 0) {
+            mainLayout.toggleMenu();
+            return;
+        }
+            
+        FragmentManager fm = MainActivity.this.getSupportFragmentManager();
+        FragmentTransaction ft = fm.beginTransaction();
+        Fragment fragment = null;
+
+        
+        if(selectedItem.compareTo("Casa") == 0) {
+            fragment = new FragmentMain();
+        } else if(selectedItem.compareTo("Trabajo") == 0) {
+            fragment = new FragmentListView();
+        }
+        
+        
+        if(fragment != null) {
+            // Replace current fragment by this new one
+//            ft.replace(R.id.activity_main_content_fragment, fragment);
+//            ft.commit();
+            
+            // Set title accordingly
+            tvTitle.setText(selectedItem);
+        }
+        
+        // Hide menu anyway
+        mainLayout.toggleMenu();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (mainLayout.isMenuShown()) {
+            mainLayout.toggleMenu();
+        }
+        else {
+            super.onBackPressed();
+        }
+    }
+    
 }

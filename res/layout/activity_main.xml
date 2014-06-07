@@ -1,26 +1,66 @@
+<com.entropy.slidingmenu2.layout.MainLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal" >
+    
+     <!-- This holds our menu -->
 
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    tools:context=".MainActivity" >
+     <LinearLayout
+         xmlns:android="http://schemas.android.com/apk/res/android"
+         android:layout_width="178dp"
+         android:layout_height="match_parent"
+         android:orientation="vertical" >
 
-    <fragment
+        <ListView
+            android:id="@+id/activity_main_menu_listview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#B4D609"
+            android:cacheColorHint="#00000000" >
+        </ListView>
+    </LinearLayout>
+    
+    <!-- This holds our content-->
+    <LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical" >
+		
+        <!-- This acts as Actionbar -->
+        <LinearLayout
+	        android:layout_width="match_parent"
+	        android:layout_height="wrap_content"
+	        android:background="#96D6E3"
+	        android:orientation="horizontal" >
+
+            <Button
+                android:id="@+id/activity_main_content_button_menu"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:onClick="toggleMenu"
+                android:text="Menu" />
+            
+            <TextView
+			     android:layout_width="0dp"
+			     android:layout_height="wrap_content"
+			     android:text="@string/app_name"
+			     android:gravity="center"
+			     android:id="@+id/activity_main_content_title"
+			     android:layout_weight="1" />
+            
+        </LinearLayout>       
+        
+        <!-- This is where fragment will show up -->
+
+		<fragment
         android:id="@+id/map"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         class="com.google.android.gms.maps.SupportMapFragment" />
 
-    <Button
-        android:id="@+id/button1"
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true"
-        android:layout_marginLeft="16dp"
-        android:layout_marginTop="19dp"
-        android:onClick="onClickAddPoint"
-        android:text="Home" />
+        
+        
+    </LinearLayout>
 
-</RelativeLayout>
+</com.entropy.slidingmenu2.layout.MainLayout>
