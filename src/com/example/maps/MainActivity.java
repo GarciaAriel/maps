@@ -1,13 +1,30 @@
 package com.example.maps;
 
+import java.math.BigDecimal;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 
 
 
+
+
+
+
+
+
+
+
+
+import org.json.JSONArray;
+import org.json.JSONException;
+
 import com.entropy.slidingmenu2.fragment.FragmentListView;
 import com.entropy.slidingmenu2.fragment.FragmentMain;
 import com.entropy.slidingmenu2.layout.MainLayout;
+import com.google.android.gms.internal.bl;
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
@@ -41,7 +58,8 @@ import android.widget.Toast;
 import android.widget.AdapterView.OnItemClickListener;
 
 
-public class MainActivity extends FragmentActivity {
+public class MainActivity extends FragmentActivity 
+{
 	
 	// The MainLayout which will hold both the sliding menu and our main content
     // Main content will holds our Fragment respectively
@@ -67,8 +85,12 @@ public class MainActivity extends FragmentActivity {
     LatLng toPosition;
     LatLng home;
     String homeFalse = "false";
-    LatLng university;
-    String universityFalse= "false";
+    LatLng work;
+    String workFalse= "false";
+    LatLng bloqueo;
+    String bloqueoFalse= "false";
+    String ok = "0";
+    PolylineOptions rectLine = new PolylineOptions().width(10).color(Color.GREEN);
     
     ArrayList<LatLng> markerPoints;
     
@@ -92,7 +114,12 @@ public class MainActivity extends FragmentActivity {
         lvMenu.setOnItemClickListener(new OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                onMenuItemClick(parent, view, position, id);
+                try {
+					onMenuItemClick(parent, view, position, id);
+				} catch (JSONException e) {
+					
+					e.printStackTrace();
+				}
             }
             
         });
@@ -127,8 +154,17 @@ public class MainActivity extends FragmentActivity {
         v2GetRouteDirection = new GMapV2GetRouteDirection();
         SupportMapFragment supportMapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
           mGoogleMap = supportMapFragment.getMap();
+          
 
+          //map = new google.maps.Map2(document.getElementById("map_canvas"));
+          CameraUpdate center=CameraUpdateFactory.newLatLng(new LatLng(-17.393792, -66.157110));
+          CameraUpdate zoom=CameraUpdateFactory.zoomTo(15);
+          
+          mGoogleMap.moveCamera(center);
+          mGoogleMap.animateCamera(zoom);
+          
           // Enabling MyLocation in Google Map
+          
           mGoogleMap.setMyLocationEnabled(true);
           mGoogleMap.getUiSettings().setZoomControlsEnabled(true);
           mGoogleMap.getUiSettings().setCompassEnabled(true);
@@ -156,7 +192,37 @@ public class MainActivity extends FragmentActivity {
 						homeFalse = "oto";
 						
 						ayudaServicios servicios = new ayudaServicios();
-						servicios.guardarPunto("nose", "garcia", home.latitude,home.longitude);
+						servicios.guardarPunto("casa", "garcia", home.latitude,home.longitude);
+						return;
+					}
+					if(workFalse == "llenar")
+					{
+						markerPoints.clear();
+						mGoogleMap.clear();
+						work = point;
+						MarkerOptions options = new MarkerOptions();
+						options.position(point);
+						options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
+						mGoogleMap.addMarker(options);
+						workFalse = "oto";
+						
+						ayudaServicios servicios = new ayudaServicios();
+						servicios.guardarPunto("trabajo", "garcia", work.latitude,work.longitude);
+						return;
+					}
+					if(bloqueoFalse == "llenar")
+					{
+						markerPoints.clear();
+						mGoogleMap.clear();
+						bloqueo = point;
+						MarkerOptions options = new MarkerOptions();
+						options.position(point);
+						options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
+						mGoogleMap.addMarker(options);
+						bloqueoFalse = "false";
+						
+						ayudaServicios servicios = new ayudaServicios();
+						servicios.guardarPunto("bloque", "garcia", bloqueo.latitude,bloqueo.longitude);
 						return;
 					}
 					// tam 2 o mayor LIMPIAR			
@@ -195,16 +261,70 @@ public class MainActivity extends FragmentActivity {
 						fromPosition = markerPoints.get(0);
 						toPosition = markerPoints.get(1);
 						
-						GetRouteTask getRoute = new GetRouteTask();
-				        getRoute.execute();
+						ayudaServicios servicios = new ayudaServicios();
+			        	JSONArray puntoBloqueoJson = servicios.getPunto("bloque", "garcia");
+			        	
+			        	if (puntoBloqueoJson != null) {
+			        		try {
+			        			double lat = puntoBloqueoJson.getJSONObject(0).getDouble("latitude");
+				        		double lon = puntoBloqueoJson.getJSONObject(0).getDouble("longitude");
+				        		bloqueo = new LatLng(lat, lon);
+				        	} catch (Exception e) {
+								// TODO: handle exception
+							}
+			        	}
+			        	HelpRute help = new HelpRute();
+			        	help.execute(ok);
+			        	
+
+//			        		GetRouteTask getRoute = new GetRouteTask();
+//			        		getRoute.execute();
+			        	
 					}
 				}
 			});
+          
     }
     	
 //000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 
-    private class GetRouteTask extends AsyncTask<String, Void, String> 
+    private class HelpRute extends AsyncTask<String, Void, String>
+    {
+    	private ProgressDialog Dialog;
+        String response = "";
+        @Override
+        protected void onPreExecute() {
+        	  rectLine = new PolylineOptions().width(10).color(Color.GREEN);
+        	
+              Dialog = new ProgressDialog(MainActivity.this);
+              Dialog.setMessage("from: "+fromPosition.latitude+"="+fromPosition.longitude+" to: "+toPosition.latitude+"="+toPosition.longitude);
+              Dialog.show();
+        }
+
+		@Override
+		protected String doInBackground(String... params) {
+			
+			getRouteTask2 getRoute = new getRouteTask2();
+			ArrayList<LatLng> listPoint = getRoute.get_route(fromPosition,toPosition,bloqueo);
+			if(listPoint!=null)
+			{
+				for (int i = 0; i < listPoint.size(); i++) {
+					rectLine.add(listPoint.get(i));
+				}
+			}
+					
+			return null;
+		}
+		@Override
+        protected void onPostExecute(String result) {
+			mGoogleMap.addPolyline(rectLine);
+	  	  	markerOptions.position(toPosition);
+	  	  	markerOptions.draggable(true);
+	  	  	mGoogleMap.addMarker(markerOptions);
+		}
+    	
+    }
+    private class GetRouteTasksss extends AsyncTask<String, Void, String> 
     {
         
         private ProgressDialog Dialog;
@@ -212,8 +332,10 @@ public class MainActivity extends FragmentActivity {
         @Override
         protected void onPreExecute() {
               Dialog = new ProgressDialog(MainActivity.this);
-              Dialog.setMessage("Loading route...");
+              Dialog.setMessage("Calculando la ruta...");
               Dialog.show();
+              
+              
         }
 
         @Override
@@ -224,29 +346,51 @@ public class MainActivity extends FragmentActivity {
               return response;
 
         }
-
+        
+	  	  
         @Override
         protected void onPostExecute(String result) {
               mGoogleMap.clear();
-              if(response.equalsIgnoreCase("Success")){
-              ArrayList<LatLng> directionPoint = v2GetRouteDirection.getDirection(document);
-              PolylineOptions rectLine = new PolylineOptions().width(10).color(
-                          Color.GREEN);
-
-              for (int i = 0; i < directionPoint.size(); i++) {
-                    rectLine.add(directionPoint.get(i));
-              }
-              // Adding route on the map
-              mGoogleMap.addPolyline(rectLine);
-              markerOptions.position(toPosition);
-              markerOptions.draggable(true);
-              mGoogleMap.addMarker(markerOptions);
-
+              if(response.equalsIgnoreCase("Success"))
+              {
+            	  ArrayList<LatLng> directionPoint = v2GetRouteDirection.getDirection(document);
+            	  
+            	  int auxxx=0;
+            	  if (bloqueo != null) 
+            	  {
+            		  for (int i = 0; i < directionPoint.size(); i++) {
+                  		double distancia = v2GetRouteDirection.CalculationByDistance(bloqueo.latitude,bloqueo.longitude, directionPoint.get(i).latitude, directionPoint.get(i).longitude);
+                  		if (distancia < 50)
+      					{
+                  			auxxx = 1;
+      						break;
+      					}
+      				  }
+            	  }
+            	  if (auxxx == 0) 
+            	  {
+            		  ok = "1";
+					for (int j = 0; j < directionPoint.size(); j++) 
+	            	  {
+	                    rectLine.add(directionPoint.get(j));
+	            	  }
+					// Adding route on the map afuera para add todos los puntos si existe bloqueo
+//	            	  mGoogleMap.addPolyline(rectLine);
+//	            	  markerOptions.position(toPosition);
+//	            	  markerOptions.draggable(true);
+//	            	  mGoogleMap.addMarker(markerOptions);
+            	  }
               }
              
               Dialog.dismiss();
         }
   }  
+    
+    
+    
+    
+    
+    
     
   @Override
   protected void onStop() {
@@ -254,6 +398,19 @@ public class MainActivity extends FragmentActivity {
         finish();
   }
     
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
 //000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -279,6 +436,17 @@ public class MainActivity extends FragmentActivity {
           
         return super.onOptionsItemSelected(item);
     }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     public void onClickAddPoint(View view) {
     	if(homeFalse == "false")
     	{
@@ -295,14 +463,24 @@ public class MainActivity extends FragmentActivity {
     			LatLng Position = new LatLng(latitude, longitude);
     			fromPosition = Position;
     			toPosition = home;
+    			
+    			HelpRute help = new HelpRute();
+	        	help.execute(ok);
 				
-				GetRouteTask getRoute = new GetRouteTask();
-		        getRoute.execute();
+//				GetRouteTask getRoute = new GetRouteTask();
+//		        getRoute.execute();
 			}
     		
     	}
 		
 	}
+    
+    
+    
+    
+    
+    
+    
     // MENU ==============================================================
     
 
@@ -310,7 +488,20 @@ public class MainActivity extends FragmentActivity {
         mainLayout.toggleMenu();
     }
     
-    private void onMenuItemClick(AdapterView<?> parent, View view, int position, long id) {
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    private void onMenuItemClick(AdapterView<?> parent, View view, int position, long id) throws JSONException {
         String selectedItem = lvMenuItems[position];
         String currentItem = tvTitle.getText().toString();
         
@@ -326,9 +517,85 @@ public class MainActivity extends FragmentActivity {
 
         
         if(selectedItem.compareTo("Casa") == 0) {
-            fragment = new FragmentMain();
+        	
+        	ayudaServicios servicios = new ayudaServicios();
+        	JSONArray puntoCasaJson = servicios.getPunto("casa", "garcia");
+			
+        	if(puntoCasaJson.length() == 0) 	{
+        		
+        		Toast.makeText(this,"Seleccione su CASA", Toast.LENGTH_LONG).show();
+        		homeFalse = "llenar";
+        	}
+        	else {
+        		Toast.makeText(this,"camino a CASA", Toast.LENGTH_LONG).show();
+        		double latitude = mGoogleMap.getMyLocation().getLatitude();
+        		double longitude = mGoogleMap.getMyLocation().getLongitude();
+        		LatLng Position = new LatLng(latitude, longitude);
+        		fromPosition = Position;
+        		
+        		double lat = puntoCasaJson.getJSONObject(0).getDouble("latitude");
+        		double lon = puntoCasaJson.getJSONObject(0).getDouble("longitude");
+        		
+        		toPosition = new LatLng(lat, lon);
+        		
+        		HelpRute help = new HelpRute();
+	        	help.execute(ok);
+    				
+//    			GetRouteTask getRoute = new GetRouteTask();
+//    		    getRoute.execute();
+    		}
+            //fragment = new FragmentMain();
         } else if(selectedItem.compareTo("Trabajo") == 0) {
-            fragment = new FragmentListView();
+        	ayudaServicios servicios = new ayudaServicios();
+        	JSONArray puntoTrabajoJson = servicios.getPunto("trabajo", "garcia");
+			
+        	if(puntoTrabajoJson.length() == 0) 	{
+        		
+        		Toast.makeText(this,"Seleccione su TRABAJO", Toast.LENGTH_LONG).show();
+        		workFalse = "llenar";
+        	}
+        	else {
+        		Toast.makeText(this,"camino al TRABAJO", Toast.LENGTH_LONG).show();
+        		double latitude = mGoogleMap.getMyLocation().getLatitude();
+        		double longitude = mGoogleMap.getMyLocation().getLongitude();
+        		LatLng Position = new LatLng(latitude, longitude);
+        		fromPosition = Position;
+        		
+        		double lat = puntoTrabajoJson.getJSONObject(0).getDouble("latitude");
+        		double lon = puntoTrabajoJson.getJSONObject(0).getDouble("longitude");
+        		
+        		toPosition = new LatLng(lat, lon);
+    				//borrar
+        		double a = work.latitude;  
+        	    double b = work.longitude;
+        	    double c = fromPosition.latitude;
+        	    double d = fromPosition.longitude;
+        	    
+        		
+     double distancia = v2GetRouteDirection.CalculationByDistance(a,b,c,d);
+     Toast.makeText(this,"diss: "+a+"-"+b+"-"+c+"-"+d, Toast.LENGTH_LONG).show();
+     
+			    HelpRute help = new HelpRute();
+			 	help.execute(ok);
+     
+//    			GetRouteTask getRoute = new GetRouteTask();
+//    		    getRoute.execute();
+    		}
+        }else if(selectedItem.compareTo("Bloqueo") == 0) {
+        	ayudaServicios servicios = new ayudaServicios();
+        	JSONArray puntoBloqueoJson = servicios.getPunto("bloque", "garcia");
+        	
+        	if (puntoBloqueoJson.length() > 0) {
+        		double lat = puntoBloqueoJson.getJSONObject(0).getDouble("latitude");
+        		double lon = puntoBloqueoJson.getJSONObject(0).getDouble("longitude");
+        		
+        		bloqueo = new LatLng(lat, lon);
+			}
+        	
+        	Toast.makeText(this,"Seleccione punto de Bloque", Toast.LENGTH_LONG).show();
+	        bloqueoFalse = "llenar";
+        		
+       	
         }
         
         
@@ -345,6 +612,17 @@ public class MainActivity extends FragmentActivity {
         mainLayout.toggleMenu();
     }
 
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     @Override
     public void onBackPressed() {
         if (mainLayout.isMenuShown()) {

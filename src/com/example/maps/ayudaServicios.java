@@ -22,7 +22,7 @@ import android.widget.TextView;
 
 @SuppressLint("NewApi")
 public class ayudaServicios {
-	String url = "http://192.168.43.189:8080/com.maps/sample/puntos";
+	String url = "http://10.0.0.6:8080/com.maps/sample/puntos";
 	
 	public JSONArray guardarPunto(String tipo,String usuario,double latitude, double longitude) {
 		
@@ -30,6 +30,38 @@ public class ayudaServicios {
 		StrictMode.setThreadPolicy(policy);
 		HttpClient httpclient = new DefaultHttpClient();
 		String complementoURL = url+"/setPunto/"+tipo+"/"+usuario+"/"+latitude+"/"+longitude;
+		JSONArray jsonArray = null;
+		HttpGet httppost = new HttpGet(complementoURL);
+		try 
+		{
+			HttpResponse response = httpclient.execute(httppost);
+			String jsonResult = inputStreamToString(
+					response.getEntity().getContent()).toString();
+
+			jsonArray = new JSONArray(jsonResult);
+			return jsonArray;
+		} 
+		catch (ClientProtocolException e) 
+		{
+			e.printStackTrace();
+		} 
+		catch (IOException e) 
+		{
+			e.printStackTrace();
+		} 
+		catch (JSONException e) 
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return jsonArray; 
+	}
+	public JSONArray getPunto(String tipo,String usuario) {
+		
+		StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+		StrictMode.setThreadPolicy(policy);
+		HttpClient httpclient = new DefaultHttpClient();
+		String complementoURL = url+"/getPunto/"+tipo+"/"+usuario;
 		JSONArray jsonArray = null;
 		HttpGet httppost = new HttpGet(complementoURL);
 		try 

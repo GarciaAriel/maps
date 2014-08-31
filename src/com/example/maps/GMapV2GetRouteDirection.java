@@ -3,7 +3,9 @@ package com.example.maps;
 
 
 import java.io.InputStream;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
@@ -18,6 +20,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import com.google.android.gms.maps.model.LatLng;
+
 import android.util.Log;
 
 public class GMapV2GetRouteDirection {
@@ -32,6 +35,7 @@ public class GMapV2GetRouteDirection {
                 + "origin=" + start.latitude + "," + start.longitude 
                 + "&destination=" + end.latitude + "," + end.longitude
                 + "&sensor=false&units=metric&mode=driving";
+        //+ "&alternatives=true"
 
         try 
         {
@@ -181,6 +185,22 @@ public class GMapV2GetRouteDirection {
             poly.add(position);
         }
         return poly;
+    }
+    
+    //(LatLng location1,LatLng location2)
+    public static double CalculationByDistance(double lat1,double lon1,double lat2,double lon2) {
+    	
+    	double R = 6371; // km
+    	double o1 = Math.toRadians(lat1);
+    	double o2 = Math.toRadians(lat2);
+    	double tri_o = Math.toRadians(lat2-lat1); //
+    	double tri_l = Math.toRadians(lon2-lon1); //
+
+    double a = Math.sin(tri_o/2)*Math.sin(tri_o/2)+Math.cos(o1)*Math.cos(o2)*Math.sin(tri_l/2)*Math.sin(tri_l/2);
+    	double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+
+    	double d = R * c;
+    	return (d*1000);
     }
 }
 
