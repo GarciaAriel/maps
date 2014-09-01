@@ -17,6 +17,9 @@ import java.util.List;
 
 
 
+
+
+
 import org.json.JSONArray;
 import org.json.JSONException;
 
@@ -41,10 +44,13 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.location.LocationManager;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.*;
@@ -91,6 +97,7 @@ public class MainActivity extends FragmentActivity
     String bloqueoFalse= "false";
     String ok = "0";
     PolylineOptions rectLine = new PolylineOptions().width(10).color(Color.GREEN);
+    String codigo_usuario="";
     
     ArrayList<LatLng> markerPoints;
     
@@ -101,6 +108,11 @@ public class MainActivity extends FragmentActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) 
     {
+    	WifiManager wifiMan = (WifiManager) this.getSystemService(Context.WIFI_SERVICE);
+		WifiInfo wifiInf = wifiMan.getConnectionInfo();
+		codigo_usuario = wifiInf.getMacAddress();
+    	
+    	
         super.onCreate(savedInstanceState);
         mainLayout = (MainLayout)this.getLayoutInflater().inflate(R.layout.activity_main, null);//new
         setContentView(mainLayout);//new
@@ -192,7 +204,7 @@ public class MainActivity extends FragmentActivity
 						homeFalse = "oto";
 						
 						ayudaServicios servicios = new ayudaServicios();
-						servicios.guardarPunto("casa", "garcia", home.latitude,home.longitude);
+						servicios.guardarPunto("casa", codigo_usuario, home.latitude,home.longitude);
 						return;
 					}
 					if(workFalse == "llenar")
@@ -207,7 +219,7 @@ public class MainActivity extends FragmentActivity
 						workFalse = "oto";
 						
 						ayudaServicios servicios = new ayudaServicios();
-						servicios.guardarPunto("trabajo", "garcia", work.latitude,work.longitude);
+						servicios.guardarPunto("trabajo", codigo_usuario, work.latitude,work.longitude);
 						return;
 					}
 					if(bloqueoFalse == "llenar")
@@ -222,7 +234,7 @@ public class MainActivity extends FragmentActivity
 						bloqueoFalse = "false";
 						
 						ayudaServicios servicios = new ayudaServicios();
-						servicios.guardarPunto("bloque", "garcia", bloqueo.latitude,bloqueo.longitude);
+						servicios.guardarPunto("bloque", codigo_usuario, bloqueo.latitude,bloqueo.longitude);
 						return;
 					}
 					// tam 2 o mayor LIMPIAR			
@@ -231,28 +243,22 @@ public class MainActivity extends FragmentActivity
 						markerPoints.clear();
 						mGoogleMap.clear();					
 					}
-					// adicionar punto
+						// adicionar punto
 					markerPoints.add(point);
-					
-					
-					// crear MarkerOptions
+						// crear MarkerOptions
 					MarkerOptions options = new MarkerOptions();
-					
-					// ajustar la pos del marker
+						// ajustar la pos del marker
 					options.position(point);
-					
-					//color marker
-					if(markerPoints.size()==1)
-					{
+						//color marker
+					if(markerPoints.size()==1){
 						options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
 					}
-					else 
-						if(markerPoints.size()==2)
-						{
+					else{ 
+						if(markerPoints.size()==2){
 							options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
 						}
-								
-					// Add marker al map
+					}
+						// Add marker al map
 					mGoogleMap.addMarker(options);
 					
 					// Checks, whether start and end locations are captured
@@ -262,7 +268,7 @@ public class MainActivity extends FragmentActivity
 						toPosition = markerPoints.get(1);
 						
 						ayudaServicios servicios = new ayudaServicios();
-			        	JSONArray puntoBloqueoJson = servicios.getPunto("bloque", "garcia");
+			        	JSONArray puntoBloqueoJson = servicios.getPunto("bloque", codigo_usuario);
 			        	
 			        	if (puntoBloqueoJson != null) {
 			        		try {
@@ -270,17 +276,12 @@ public class MainActivity extends FragmentActivity
 				        		double lon = puntoBloqueoJson.getJSONObject(0).getDouble("longitude");
 				        		bloqueo = new LatLng(lat, lon);
 				        	} catch (Exception e) {
-								// TODO: handle exception
+				        		System.out.println("en captura de 2 puntos y call punto bloqueo"); 
 							}
 			        	}
 			        	HelpRute help = new HelpRute();
-			        	help.execute(ok);
-			        	
-
-//			        		GetRouteTask getRoute = new GetRouteTask();
-//			        		getRoute.execute();
-			        	
-					}
+			        	help.execute();
+			        }
 				}
 			});
           
@@ -297,13 +298,12 @@ public class MainActivity extends FragmentActivity
         	  rectLine = new PolylineOptions().width(10).color(Color.GREEN);
         	
               Dialog = new ProgressDialog(MainActivity.this);
-              Dialog.setMessage("from: "+fromPosition.latitude+"="+fromPosition.longitude+" to: "+toPosition.latitude+"="+toPosition.longitude);
+              Dialog.setMessage("Espere un momento");
               Dialog.show();
         }
 
 		@Override
 		protected String doInBackground(String... params) {
-			
 			getRouteTask2 getRoute = new getRouteTask2();
 			ArrayList<LatLng> listPoint = getRoute.get_route(fromPosition,toPosition,bloqueo);
 			if(listPoint!=null)
@@ -321,9 +321,9 @@ public class MainActivity extends FragmentActivity
 	  	  	markerOptions.position(toPosition);
 	  	  	markerOptions.draggable(true);
 	  	  	mGoogleMap.addMarker(markerOptions);
+	  	  Dialog.dismiss();
 		}
-    	
-    }
+	}
     private class GetRouteTasksss extends AsyncTask<String, Void, String> 
     {
         
@@ -465,7 +465,7 @@ public class MainActivity extends FragmentActivity
     			toPosition = home;
     			
     			HelpRute help = new HelpRute();
-	        	help.execute(ok);
+	        	help.execute();
 				
 //				GetRouteTask getRoute = new GetRouteTask();
 //		        getRoute.execute();
@@ -502,7 +502,8 @@ public class MainActivity extends FragmentActivity
     
     
     private void onMenuItemClick(AdapterView<?> parent, View view, int position, long id) throws JSONException {
-        String selectedItem = lvMenuItems[position];
+    	
+    	String selectedItem = lvMenuItems[position];
         String currentItem = tvTitle.getText().toString();
         
         // Do nothing if selectedItem is currentItem
@@ -516,17 +517,18 @@ public class MainActivity extends FragmentActivity
         Fragment fragment = null;
 
         
-        if(selectedItem.compareTo("Casa") == 0) {
-        	
+        if(selectedItem.compareTo("Dirigirse a Casa") == 0) 
+        {
         	ayudaServicios servicios = new ayudaServicios();
-        	JSONArray puntoCasaJson = servicios.getPunto("casa", "garcia");
+        	JSONArray puntoCasaJson = servicios.getPunto("casa", codigo_usuario);
 			
-        	if(puntoCasaJson.length() == 0) 	{
-        		
-        		Toast.makeText(this,"Seleccione su CASA", Toast.LENGTH_LONG).show();
+        	if(puntoCasaJson.length() == 0) 	
+        	{
+        		Toast.makeText(this,"Seleccione Punto a CASA", Toast.LENGTH_LONG).show();
         		homeFalse = "llenar";
         	}
-        	else {
+        	else 
+        	{
         		Toast.makeText(this,"camino a CASA", Toast.LENGTH_LONG).show();
         		double latitude = mGoogleMap.getMyLocation().getLatitude();
         		double longitude = mGoogleMap.getMyLocation().getLongitude();
@@ -540,73 +542,68 @@ public class MainActivity extends FragmentActivity
         		
         		HelpRute help = new HelpRute();
 	        	help.execute(ok);
-    				
-//    			GetRouteTask getRoute = new GetRouteTask();
-//    		    getRoute.execute();
+
     		}
-            //fragment = new FragmentMain();
-        } else if(selectedItem.compareTo("Trabajo") == 0) {
-        	ayudaServicios servicios = new ayudaServicios();
-        	JSONArray puntoTrabajoJson = servicios.getPunto("trabajo", "garcia");
+        } 
+        else 
+        	if(selectedItem.compareTo("Dirigirse al Trabajo") == 0) 
+        	{
+        		ayudaServicios servicios = new ayudaServicios();
+        		JSONArray puntoTrabajoJson = servicios.getPunto("trabajo", codigo_usuario);
 			
-        	if(puntoTrabajoJson.length() == 0) 	{
+        		if(puntoTrabajoJson.length() == 0) 	
+        		{
         		
-        		Toast.makeText(this,"Seleccione su TRABAJO", Toast.LENGTH_LONG).show();
-        		workFalse = "llenar";
+        			Toast.makeText(this,"Seleccione punto al TRABAJO", Toast.LENGTH_LONG).show();
+        			workFalse = "llenar";
+        		}
+        		else 
+        		{
+        			Toast.makeText(this,"camino al TRABAJO", Toast.LENGTH_LONG).show();
+        			double latitude = mGoogleMap.getMyLocation().getLatitude();
+        			double longitude = mGoogleMap.getMyLocation().getLongitude();
+        			LatLng Position = new LatLng(latitude, longitude);
+        			fromPosition = Position;
+        		
+        			double lat = puntoTrabajoJson.getJSONObject(0).getDouble("latitude");
+        			double lon = puntoTrabajoJson.getJSONObject(0).getDouble("longitude");
+        		
+        			toPosition = new LatLng(lat, lon);
+    				
+        			HelpRute help = new HelpRute();
+        			help.execute(ok);
+        		}
         	}
-        	else {
-        		Toast.makeText(this,"camino al TRABAJO", Toast.LENGTH_LONG).show();
-        		double latitude = mGoogleMap.getMyLocation().getLatitude();
-        		double longitude = mGoogleMap.getMyLocation().getLongitude();
-        		LatLng Position = new LatLng(latitude, longitude);
-        		fromPosition = Position;
-        		
-        		double lat = puntoTrabajoJson.getJSONObject(0).getDouble("latitude");
-        		double lon = puntoTrabajoJson.getJSONObject(0).getDouble("longitude");
-        		
-        		toPosition = new LatLng(lat, lon);
-    				//borrar
-        		double a = work.latitude;  
-        	    double b = work.longitude;
-        	    double c = fromPosition.latitude;
-        	    double d = fromPosition.longitude;
-        	    
-        		
-     double distancia = v2GetRouteDirection.CalculationByDistance(a,b,c,d);
-     Toast.makeText(this,"diss: "+a+"-"+b+"-"+c+"-"+d, Toast.LENGTH_LONG).show();
-     
-			    HelpRute help = new HelpRute();
-			 	help.execute(ok);
-     
-//    			GetRouteTask getRoute = new GetRouteTask();
-//    		    getRoute.execute();
-    		}
-        }else if(selectedItem.compareTo("Bloqueo") == 0) {
-        	ayudaServicios servicios = new ayudaServicios();
-        	JSONArray puntoBloqueoJson = servicios.getPunto("bloque", "garcia");
+        	else 
+        		if(selectedItem.compareTo("Compartir punto de Bloqueo") == 0) 
+        		{
+        			ayudaServicios servicios = new ayudaServicios();
+        			JSONArray puntoBloqueoJson = servicios.getPunto("bloque", codigo_usuario);
         	
-        	if (puntoBloqueoJson.length() > 0) {
-        		double lat = puntoBloqueoJson.getJSONObject(0).getDouble("latitude");
-        		double lon = puntoBloqueoJson.getJSONObject(0).getDouble("longitude");
+        			if (puntoBloqueoJson.length() > 0) 
+        			{
+		        		double lat = puntoBloqueoJson.getJSONObject(0).getDouble("latitude");
+		        		double lon = puntoBloqueoJson.getJSONObject(0).getDouble("longitude");
+		        		
+		        		bloqueo = new LatLng(lat, lon);
+        			}
+        			
+        			
+        			
+        			Toast.makeText(this,"Seleccione punto de Bloque=", Toast.LENGTH_LONG).show();
+        			bloqueoFalse = "llenar";
         		
-        		bloqueo = new LatLng(lat, lon);
-			}
-        	
-        	Toast.makeText(this,"Seleccione punto de Bloque", Toast.LENGTH_LONG).show();
-	        bloqueoFalse = "llenar";
-        		
-       	
-        }
+        		}
         
-        
-        if(fragment != null) {
+        	if(fragment != null) 
+        	{
             // Replace current fragment by this new one
-//            ft.replace(R.id.activity_main_content_fragment, fragment);
+        		//           ft.replace(R.id.activity_main_content_fragment, fragment);
 //            ft.commit();
             
             // Set title accordingly
-            tvTitle.setText(selectedItem);
-        }
+        		tvTitle.setText(selectedItem);
+        	}
         
         // Hide menu anyway
         mainLayout.toggleMenu();

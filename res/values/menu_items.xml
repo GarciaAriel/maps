@@ -2,10 +2,9 @@
 <resources>
     <string-array name="menu_items">
         
-        <item >Casa</item>
-        <item >Trabajo</item>
-        <item >Bloqueo</item>
-        nose
+        <item >Dirigirse a Casa</item>
+        <item >Dirigirse al Trabajo</item>
+        <item >Compartir punto de Bloqueo</item>
         
     </string-array>
 </resources>
