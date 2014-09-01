@@ -6,20 +6,6 @@ import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 import org.json.JSONArray;
 import org.json.JSONException;
 
@@ -93,7 +79,8 @@ public class MainActivity extends FragmentActivity
     String homeFalse = "false";
     LatLng work;
     String workFalse= "false";
-    LatLng bloqueo;
+    //LatLng bloqueo;
+    ArrayList<LatLng> puntosDeBloqueo = new ArrayList<LatLng>();
     String bloqueoFalse= "false";
     String ok = "0";
     PolylineOptions rectLine = new PolylineOptions().width(10).color(Color.GREEN);
@@ -199,7 +186,7 @@ public class MainActivity extends FragmentActivity
 						home = point;
 						MarkerOptions options = new MarkerOptions();
 						options.position(point);
-						options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
+						options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA));
 						mGoogleMap.addMarker(options);
 						homeFalse = "oto";
 						
@@ -214,7 +201,7 @@ public class MainActivity extends FragmentActivity
 						work = point;
 						MarkerOptions options = new MarkerOptions();
 						options.position(point);
-						options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
+						options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA));
 						mGoogleMap.addMarker(options);
 						workFalse = "oto";
 						
@@ -226,15 +213,20 @@ public class MainActivity extends FragmentActivity
 					{
 						markerPoints.clear();
 						mGoogleMap.clear();
-						bloqueo = point;
-						MarkerOptions options = new MarkerOptions();
-						options.position(point);
-						options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
-						mGoogleMap.addMarker(options);
+						//bloqueo = point;
+						puntosDeBloqueo.add(point);
+						
+						for(int i=0 ; i<puntosDeBloqueo.size() ; i++)
+						{
+							markerOptions.position(puntosDeBloqueo.get(i));
+							markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
+							mGoogleMap.addMarker(markerOptions);
+						}
+						
 						bloqueoFalse = "false";
 						
 						ayudaServicios servicios = new ayudaServicios();
-						servicios.guardarPuntoBloqueo(codigo_usuario, bloqueo.latitude,bloqueo.longitude);
+						servicios.guardarPuntoBloqueo(codigo_usuario, point.latitude,point.longitude);
 						return;
 					}
 					// tam 2 o mayor LIMPIAR			
@@ -255,7 +247,7 @@ public class MainActivity extends FragmentActivity
 					}
 					else{ 
 						if(markerPoints.size()==2){
-							options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
+							options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
 						}
 					}
 						// Add marker al map
@@ -267,18 +259,6 @@ public class MainActivity extends FragmentActivity
 						fromPosition = markerPoints.get(0);
 						toPosition = markerPoints.get(1);
 						
-						ayudaServicios servicios = new ayudaServicios();
-			        	JSONArray puntoBloqueoJson = servicios.getPunto("bloque", codigo_usuario);
-			        	
-			        	if (puntoBloqueoJson != null) {
-			        		try {
-			        			double lat = puntoBloqueoJson.getJSONObject(0).getDouble("latitude");
-				        		double lon = puntoBloqueoJson.getJSONObject(0).getDouble("longitude");
-				        		bloqueo = new LatLng(lat, lon);
-				        	} catch (Exception e) {
-				        		System.out.println("en captura de 2 puntos y call punto bloqueo"); 
-							}
-			        	}
 			        	HelpRute help = new HelpRute();
 			        	help.execute();
 			        }
@@ -295,17 +275,22 @@ public class MainActivity extends FragmentActivity
         String response = "";
         @Override
         protected void onPreExecute() {
+        	  mGoogleMap.clear();
         	  rectLine = new PolylineOptions().width(10).color(Color.GREEN);
-        	
               Dialog = new ProgressDialog(MainActivity.this);
               Dialog.setMessage("Espere un momento");
               Dialog.show();
+              ayudaServicios help = new ayudaServicios();
+  			  puntosDeBloqueo = help.getPuntosBloqueoPersistente();
         }
 
 		@Override
 		protected String doInBackground(String... params) {
 			getRouteTask2 getRoute = new getRouteTask2();
-			ArrayList<LatLng> listPoint = getRoute.get_route(fromPosition,toPosition,bloqueo);
+			ArrayList<LatLng> listPoint;
+			
+			listPoint = getRoute.get_route(fromPosition,toPosition,puntosDeBloqueo);
+			
 			if(listPoint!=null)
 			{
 				for (int i = 0; i < listPoint.size(); i++) {
@@ -318,85 +303,29 @@ public class MainActivity extends FragmentActivity
 		@Override
         protected void onPostExecute(String result) {
 			//puntos bloqueo
-			ayudaServicios help = new ayudaServicios();
-			ArrayList<LatLng> puntos = help.getPuntosBloqueoPersistente();
+			
 			markerOptions = new MarkerOptions();
-			for(int i=0 ; i<puntos.size() ; i++)
+			for(int i=0 ; i<puntosDeBloqueo.size() ; i++)
 			{
-				markerOptions.position(puntos.get(i));
+				markerOptions.position(puntosDeBloqueo.get(i));
 				markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
 				mGoogleMap.addMarker(markerOptions);
 			}
+			markerOptions.position(fromPosition);
+			markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+			mGoogleMap.addMarker(markerOptions);
+			
+			markerOptions.position(toPosition);
+			markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
+			mGoogleMap.addMarker(markerOptions);
 			
 			mGoogleMap.addPolyline(rectLine);
-	  	  	markerOptions.position(toPosition);
 	  	  	markerOptions.draggable(true);
 	  	  	mGoogleMap.addMarker(markerOptions);
 	  	  Dialog.dismiss();
 		}
 	}
-    private class GetRouteTasksss extends AsyncTask<String, Void, String> 
-    {
-        
-        private ProgressDialog Dialog;
-        String response = "";
-        @Override
-        protected void onPreExecute() {
-              Dialog = new ProgressDialog(MainActivity.this);
-              Dialog.setMessage("Calculando la ruta...");
-              Dialog.show();
-              
-              
-        }
 
-        @Override
-        protected String doInBackground(String... urls) {
-              //Get All Route values
-              document = v2GetRouteDirection.getDocument(fromPosition, toPosition, GMapV2GetRouteDirection.MODE_DRIVING);
-              response = "Success";
-              return response;
-
-        }
-        
-	  	  
-        @Override
-        protected void onPostExecute(String result) {
-              mGoogleMap.clear();
-              if(response.equalsIgnoreCase("Success"))
-              {
-            	  ArrayList<LatLng> directionPoint = v2GetRouteDirection.getDirection(document);
-            	  
-            	  int auxxx=0;
-            	  if (bloqueo != null) 
-            	  {
-            		  for (int i = 0; i < directionPoint.size(); i++) {
-                  		double distancia = v2GetRouteDirection.CalculationByDistance(bloqueo.latitude,bloqueo.longitude, directionPoint.get(i).latitude, directionPoint.get(i).longitude);
-                  		if (distancia < 50)
-      					{
-                  			auxxx = 1;
-      						break;
-      					}
-      				  }
-            	  }
-            	  if (auxxx == 0) 
-            	  {
-            		  ok = "1";
-					for (int j = 0; j < directionPoint.size(); j++) 
-	            	  {
-	                    rectLine.add(directionPoint.get(j));
-	            	  }
-					// Adding route on the map afuera para add todos los puntos si existe bloqueo
-//	            	  mGoogleMap.addPolyline(rectLine);
-//	            	  markerOptions.position(toPosition);
-//	            	  markerOptions.draggable(true);
-//	            	  mGoogleMap.addMarker(markerOptions);
-            	  }
-              }
-             
-              Dialog.dismiss();
-        }
-  }  
-    
     
     
     
@@ -409,6 +338,12 @@ public class MainActivity extends FragmentActivity
         finish();
   }
     
+  @Override
+  protected void onRestart() {
+      super.onRestart();  // Always call the superclass method first
+      
+      // Activity being restarted from stopped state    
+  }
   
   
   
@@ -589,21 +524,10 @@ public class MainActivity extends FragmentActivity
         		if(selectedItem.compareTo("Compartir punto de Bloqueo") == 0) 
         		{
         			ayudaServicios servicios = new ayudaServicios();
-        			JSONArray puntoBloqueoJson = servicios.getPunto("bloque", codigo_usuario);
-        	
-        			if (puntoBloqueoJson.length() > 0) 
-        			{
-		        		double lat = puntoBloqueoJson.getJSONObject(0).getDouble("latitude");
-		        		double lon = puntoBloqueoJson.getJSONObject(0).getDouble("longitude");
-		        		
-		        		bloqueo = new LatLng(lat, lon);
-        			}
-        			
-        			
+        			puntosDeBloqueo = servicios.getPuntosBloqueoPersistente();
         			
         			Toast.makeText(this,"Seleccione punto de Bloque=", Toast.LENGTH_LONG).show();
         			bloqueoFalse = "llenar";
-        		
         		}
         
         	if(fragment != null) 

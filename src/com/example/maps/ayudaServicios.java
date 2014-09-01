@@ -26,7 +26,7 @@ import android.widget.TextView;
 
 @SuppressLint("NewApi")
 public class ayudaServicios {
-	String url = "http://192.168.182.163:8080/com.maps/sample/puntos";
+	String url = "http://192.168.43.189:8080/com.maps/sample/puntos";
 	
 	public JSONArray guardarPunto(String tipo,String usuario,double latitude, double longitude) {
 		
