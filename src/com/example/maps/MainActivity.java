@@ -234,7 +234,7 @@ public class MainActivity extends FragmentActivity
 						bloqueoFalse = "false";
 						
 						ayudaServicios servicios = new ayudaServicios();
-						servicios.guardarPunto("bloque", codigo_usuario, bloqueo.latitude,bloqueo.longitude);
+						servicios.guardarPuntoBloqueo(codigo_usuario, bloqueo.latitude,bloqueo.longitude);
 						return;
 					}
 					// tam 2 o mayor LIMPIAR			
@@ -317,6 +317,17 @@ public class MainActivity extends FragmentActivity
 		}
 		@Override
         protected void onPostExecute(String result) {
+			//puntos bloqueo
+			ayudaServicios help = new ayudaServicios();
+			ArrayList<LatLng> puntos = help.getPuntosBloqueoPersistente();
+			markerOptions = new MarkerOptions();
+			for(int i=0 ; i<puntos.size() ; i++)
+			{
+				markerOptions.position(puntos.get(i));
+				markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
+				mGoogleMap.addMarker(markerOptions);
+			}
+			
 			mGoogleMap.addPolyline(rectLine);
 	  	  	markerOptions.position(toPosition);
 	  	  	markerOptions.draggable(true);

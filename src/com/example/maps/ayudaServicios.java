@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
@@ -12,6 +13,9 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
+
+import com.google.android.gms.maps.model.LatLng;
 
 import android.R.string;
 import android.annotation.SuppressLint;
@@ -22,7 +26,7 @@ import android.widget.TextView;
 
 @SuppressLint("NewApi")
 public class ayudaServicios {
-	String url = "http://10.0.0.6:8080/com.maps/sample/puntos";
+	String url = "http://192.168.182.163:8080/com.maps/sample/puntos";
 	
 	public JSONArray guardarPunto(String tipo,String usuario,double latitude, double longitude) {
 		
@@ -30,6 +34,40 @@ public class ayudaServicios {
 		StrictMode.setThreadPolicy(policy);
 		HttpClient httpclient = new DefaultHttpClient();
 		String complementoURL = url+"/setPunto/"+tipo+"/"+usuario+"/"+latitude+"/"+longitude;
+		JSONArray jsonArray = null;
+		HttpGet httppost = new HttpGet(complementoURL);
+		try 
+		{
+			HttpResponse response = httpclient.execute(httppost);
+			String jsonResult = inputStreamToString(
+					response.getEntity().getContent()).toString();
+
+			jsonArray = new JSONArray(jsonResult);
+			return jsonArray;
+		} 
+		catch (ClientProtocolException e) 
+		{
+			e.printStackTrace();
+		} 
+		catch (IOException e) 
+		{
+			e.printStackTrace();
+		} 
+		catch (JSONException e) 
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return jsonArray; 
+	}
+	
+	
+	public JSONArray guardarPuntoBloqueo(String codigo,double latitude, double longitude) {
+		
+		StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+		StrictMode.setThreadPolicy(policy);
+		HttpClient httpclient = new DefaultHttpClient();
+		String complementoURL = url+"/setPuntoBloqueo/"+codigo+"/"+latitude+"/"+longitude;
 		JSONArray jsonArray = null;
 		HttpGet httppost = new HttpGet(complementoURL);
 		try 
@@ -87,6 +125,51 @@ public class ayudaServicios {
 			e.printStackTrace();
 		}
 		return jsonArray; 
+	}
+public ArrayList<LatLng> getPuntosBloqueoPersistente() {
+		
+		StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+		StrictMode.setThreadPolicy(policy);
+		HttpClient httpclient = new DefaultHttpClient();
+		String complementoURL = url+"/getPuntosBloqueoPersistente";
+		JSONArray jsonArray = null;
+		HttpGet httppost = new HttpGet(complementoURL);
+		
+		ArrayList<LatLng> result = new ArrayList<LatLng>();
+		try 
+		{
+			HttpResponse response = httpclient.execute(httppost);
+			String jsonResult = inputStreamToString(
+					response.getEntity().getContent()).toString();
+
+			jsonArray = new JSONArray(jsonResult);
+			for(int i = 0 ; i<jsonArray.length() ; i++)
+			{
+				 JSONObject json_data = jsonArray.getJSONObject(i);
+				 double lat = json_data.getDouble("latitude");
+				 double lon = json_data.getDouble("longitude");
+				 LatLng punto = new LatLng(lat, lon);
+				 result.add(punto);
+			}
+			return result;
+		} 
+		catch (ClientProtocolException e) 
+		{
+			e.printStackTrace();
+		} 
+		catch (IOException e) 
+		{
+			e.printStackTrace();
+		} 
+		catch (JSONException e) 
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		
+		
+		return null; 
 	}
 	private StringBuilder inputStreamToString(InputStream is) {
 		String rLine = "";
