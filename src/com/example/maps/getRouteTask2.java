@@ -5,6 +5,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import android.R.integer;
 import android.provider.DocumentsContract.Document;
 
 import com.google.android.gms.maps.model.LatLng;
@@ -42,23 +43,17 @@ public class getRouteTask2 {
 		else
 		{
 			//calculo math resta perpendicular
-			double pendiente = (-1)/((fromP.longitude-toP.longitude)/(fromP.latitude-toP.latitude));
-			double cons = (pendiente*(-bloqueo.latitude))+bloqueo.longitude;
-			double ParaSumar= (Math.abs(fromP.latitude-toP.latitude)+Math.abs(fromP.longitude-toP.longitude))/100;
-			double newX = bloqueo.latitude+ParaSumar;
-			double newY = ((pendiente*newX)+cons);
+			LatLng newPointMedio = getPointPerpendicular(fromP,toP,bloqueo,2);
 			
-			double distancia=(v2GetRouteDirection.CalculationByDistance(bloqueo.latitude,bloqueo.longitude,newX,newY));
-			while(distancia<200)
-			{
-				newX = newX+ParaSumar;
-				newY = ((pendiente*newX)+cons);
-				distancia=(v2GetRouteDirection.CalculationByDistance(bloqueo.latitude,bloqueo.longitude,newX,newY));
+			//verificar si esta cerca de otro pundo de bloqueo
+			int dir = 3;
+			while (verificarNewPointNearBloqueo(newPointMedio,puntosBloqueo)) {
+				newPointMedio = getPointPerpendicular(fromP,toP,bloqueo,dir);
+				dir+=1;
 			}
-			LatLng medio = new LatLng(newX, newY);
 			
-			res.addAll(get_route(fromP, medio, puntosBloqueo));
-			res.addAll(get_route(medio, toP, puntosBloqueo));
+			res.addAll(get_route(fromP, newPointMedio, puntosBloqueo));
+			res.addAll(get_route(newPointMedio, toP, puntosBloqueo));
 			
 		}
 		return res;
@@ -74,17 +69,15 @@ public class getRouteTask2 {
       	  ContenedorTemporalPuntos.clear();
       	ContenedorTemporalPuntos = directionPoint;
       	  //tengo puntos de bloqueo entro y camparo
-      	  int auxxx=0;
       	  if (mapPuntosBloqueo != null || mapPuntosBloqueo.size() != 0)	  {
       		  for (int i = 0; i < directionPoint.size(); i++) {
       			  
       			 for (Map.Entry<LatLng, String> entry : mapPuntosBloqueo.entrySet()) {
       				LatLng temporal = entry.getKey(); 
       				double distancia = v2GetRouteDirection.CalculationByDistance(temporal.latitude,temporal.longitude, directionPoint.get(i).latitude, directionPoint.get(i).longitude);
-            		if (distancia < 120){
+            		if (distancia < 130){
             			entry.setValue("no");
-            			auxxx = 1;
-						return mapPuntosBloqueo;
+            			return mapPuntosBloqueo;
 					}
       			  }
               }
@@ -99,6 +92,41 @@ public class getRouteTask2 {
 			}
 		}
 		return null;		
+	}
+	private boolean verificarNewPointNearBloqueo(LatLng newPointMedio,ArrayList<LatLng> puntosBloqueo)
+	{
+		for (int i = 0; i < puntosBloqueo.size(); i++) {
+			double distancia=(v2GetRouteDirection.CalculationByDistance(newPointMedio.latitude,newPointMedio.longitude,puntosBloqueo.get(i).latitude,puntosBloqueo.get(i).longitude));
+			if (distancia<120) {
+				return true;
+			}
+		}
+		return false;
+	}
+	private LatLng getPointPerpendicular(LatLng from,LatLng to,LatLng blo,int dir)
+	{
+		double pendiente = (-1)/((from.longitude-to.longitude)/(from.latitude-to.latitude));
+		double cons = (pendiente*(-blo.latitude))+blo.longitude;
+		double ParaSumar= (Math.abs(from.latitude-to.latitude)+Math.abs(from.longitude-to.longitude))/100;
+		double newX;
+		if (dir%2==0) {
+			newX = blo.latitude+(ParaSumar*(dir-1));	
+		}
+		else{
+			newX = blo.latitude-(ParaSumar*(dir-1));
+		}
+		
+		double newY = ((pendiente*newX)+cons);
+		
+		double distancia=(v2GetRouteDirection.CalculationByDistance(blo.latitude,blo.longitude,newX,newY));
+		while(distancia<200)
+		{
+			newX = newX+ParaSumar;
+			newY = ((pendiente*newX)+cons);
+			distancia=(v2GetRouteDirection.CalculationByDistance(blo.latitude,blo.longitude,newX,newY));
+		}
+		LatLng medio = new LatLng(newX, newY);
+		return medio;
 	}
 	
 	

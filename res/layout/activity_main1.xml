@@ -12,7 +12,7 @@
         class="com.google.android.gms.maps.SupportMapFragment" />
 
     <Button
-        android:id="@+id/button1"
+        android:id="@+id/_ini_ruta"
         style="?android:attr/buttonStyleSmall"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

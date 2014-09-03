@@ -17,7 +17,9 @@ import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -158,9 +160,13 @@ public class MainActivity extends FragmentActivity
           //map = new google.maps.Map2(document.getElementById("map_canvas"));
           CameraUpdate center=CameraUpdateFactory.newLatLng(new LatLng(-17.393792, -66.157110));
           CameraUpdate zoom=CameraUpdateFactory.zoomTo(15);
+          //CameraUpdate zoom=CameraUpdateFactory.zoomTo(15);
           
-          mGoogleMap.moveCamera(center);
+          //mGoogleMap.moveCamera(center);
           mGoogleMap.animateCamera(zoom);
+          
+          
+          
           
           // Enabling MyLocation in Google Map
           
@@ -173,6 +179,9 @@ public class MainActivity extends FragmentActivity
           mGoogleMap.animateCamera(CameraUpdateFactory.zoomTo(12));
           markerOptions = new MarkerOptions();
           
+          CameraPosition cameraPosition = new CameraPosition.Builder().target(new LatLng(-17.393792, -66.157110)).zoom(17).bearing(90).tilt(45).build();
+          mGoogleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+                    
           mGoogleMap.setOnMapClickListener(new OnMapClickListener() {
 				
         	  
@@ -563,6 +572,11 @@ public class MainActivity extends FragmentActivity
         else {
             super.onBackPressed();
         }
+    }
+    
+    public void iniciar_recorrido()
+    {
+    	
     }
     
 }

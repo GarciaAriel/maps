@@ -293,6 +293,7 @@ int drawable ic_plusone_medium_off_client 0x7f020070
 int drawable ic_plusone_small_off_client 0x7f020071
 int drawable ic_plusone_standard_off_client 0x7f020072
 int drawable ic_plusone_tall_off_client 0x7f020073
+int id _ini_ruta 0x7f060043
 int id action_bar 0x7f06001f
 int id action_bar_activity_content 0x7f060018
 int id action_bar_container 0x7f06001e
@@ -310,7 +311,6 @@ int id activity_main_content_title 0x7f060041
 int id activity_main_menu_listview 0x7f06003f
 int id always 0x7f06000f
 int id beginning 0x7f060014
-int id button1 0x7f060043
 int id checkbox 0x7f060030
 int id collapseActionView 0x7f060011
 int id default_activity_button 0x7f06002b
