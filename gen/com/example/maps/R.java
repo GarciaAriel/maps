@@ -1278,7 +1278,7 @@ containing a value of this type.
         public static final int ic_plusone_tall_off_client=0x7f020073;
     }
     public static final class id {
-        public static final int _ini_ruta=0x7f060043;
+        public static final int _ini_ruta=0x7f060042;
         public static final int action_bar=0x7f06001f;
         public static final int action_bar_activity_content=0x7f060018;
         public static final int action_bar_container=0x7f06001e;
@@ -1318,7 +1318,7 @@ containing a value of this type.
         public static final int item2=0x7f060047;
         public static final int listMode=0x7f060005;
         public static final int list_item=0x7f06002c;
-        public static final int map=0x7f060042;
+        public static final int map=0x7f060043;
         public static final int middle=0x7f060015;
         public static final int never=0x7f06000d;
         public static final int none=0x7f060000;

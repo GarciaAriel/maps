@@ -93,7 +93,7 @@ public class getRouteTask2 {
 		}
 		return null;		
 	}
-	private boolean verificarNewPointNearBloqueo(LatLng newPointMedio,ArrayList<LatLng> puntosBloqueo)
+	public boolean verificarNewPointNearBloqueo(LatLng newPointMedio,ArrayList<LatLng> puntosBloqueo)
 	{
 		for (int i = 0; i < puntosBloqueo.size(); i++) {
 			double distancia=(v2GetRouteDirection.CalculationByDistance(newPointMedio.latitude,newPointMedio.longitude,puntosBloqueo.get(i).latitude,puntosBloqueo.get(i).longitude));
@@ -102,6 +102,16 @@ public class getRouteTask2 {
 			}
 		}
 		return false;
+	}
+	public int verificarMyPosCercaCamino(LatLng newPointMedio,ArrayList<LatLng> puntosBloqueo)
+	{
+		for (int i = 0; i < puntosBloqueo.size(); i++) {
+			double distancia=(v2GetRouteDirection.CalculationByDistance(newPointMedio.latitude,newPointMedio.longitude,puntosBloqueo.get(i).latitude,puntosBloqueo.get(i).longitude));
+			if (distancia<120) {
+				return i;
+			}
+		}
+		return -1;
 	}
 	private LatLng getPointPerpendicular(LatLng from,LatLng to,LatLng blo,int dir)
 	{

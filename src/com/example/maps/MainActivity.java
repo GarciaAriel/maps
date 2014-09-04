@@ -16,6 +16,7 @@ import com.google.android.gms.internal.bl;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.GoogleMap.OnCameraChangeListener;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
@@ -27,6 +28,7 @@ import com.google.android.gms.maps.GoogleMap.OnMapClickListener;
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.Overlay;
 
+import android.R.integer;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
@@ -86,6 +88,7 @@ public class MainActivity extends FragmentActivity
     String bloqueoFalse= "false";
     String ok = "0";
     PolylineOptions rectLine = new PolylineOptions().width(10).color(Color.GREEN);
+    ArrayList<LatLng> puntosDeLaRuta = new ArrayList<LatLng>();
     String codigo_usuario="";
     
     ArrayList<LatLng> markerPoints;
@@ -162,10 +165,12 @@ public class MainActivity extends FragmentActivity
           CameraUpdate zoom=CameraUpdateFactory.zoomTo(15);
           //CameraUpdate zoom=CameraUpdateFactory.zoomTo(15);
           
-          //mGoogleMap.moveCamera(center);
+          mGoogleMap.moveCamera(center);
           mGoogleMap.animateCamera(zoom);
           
+//00000000000000000000000
           
+          //00000000000000000000
           
           
           // Enabling MyLocation in Google Map
@@ -179,100 +184,9 @@ public class MainActivity extends FragmentActivity
           mGoogleMap.animateCamera(CameraUpdateFactory.zoomTo(12));
           markerOptions = new MarkerOptions();
           
-          CameraPosition cameraPosition = new CameraPosition.Builder().target(new LatLng(-17.393792, -66.157110)).zoom(17).bearing(90).tilt(45).build();
-          mGoogleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+          
                     
-          mGoogleMap.setOnMapClickListener(new OnMapClickListener() {
-				
-        	  
-				@Override
-				public void onMapClick(LatLng point) 
-				{
-					if(homeFalse == "llenar")
-					{
-						markerPoints.clear();
-						mGoogleMap.clear();
-						home = point;
-						MarkerOptions options = new MarkerOptions();
-						options.position(point);
-						options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA));
-						mGoogleMap.addMarker(options);
-						homeFalse = "oto";
-						
-						ayudaServicios servicios = new ayudaServicios();
-						servicios.guardarPunto("casa", codigo_usuario, home.latitude,home.longitude);
-						return;
-					}
-					if(workFalse == "llenar")
-					{
-						markerPoints.clear();
-						mGoogleMap.clear();
-						work = point;
-						MarkerOptions options = new MarkerOptions();
-						options.position(point);
-						options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA));
-						mGoogleMap.addMarker(options);
-						workFalse = "oto";
-						
-						ayudaServicios servicios = new ayudaServicios();
-						servicios.guardarPunto("trabajo", codigo_usuario, work.latitude,work.longitude);
-						return;
-					}
-					if(bloqueoFalse == "llenar")
-					{
-						markerPoints.clear();
-						mGoogleMap.clear();
-						//bloqueo = point;
-						puntosDeBloqueo.add(point);
-						
-						for(int i=0 ; i<puntosDeBloqueo.size() ; i++)
-						{
-							markerOptions.position(puntosDeBloqueo.get(i));
-							markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
-							mGoogleMap.addMarker(markerOptions);
-						}
-						
-						bloqueoFalse = "false";
-						
-						ayudaServicios servicios = new ayudaServicios();
-						servicios.guardarPuntoBloqueo(codigo_usuario, point.latitude,point.longitude);
-						return;
-					}
-					// tam 2 o mayor LIMPIAR			
-					if(markerPoints.size()>1)
-					{
-						markerPoints.clear();
-						mGoogleMap.clear();					
-					}
-						// adicionar punto
-					markerPoints.add(point);
-						// crear MarkerOptions
-					MarkerOptions options = new MarkerOptions();
-						// ajustar la pos del marker
-					options.position(point);
-						//color marker
-					if(markerPoints.size()==1){
-						options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
-					}
-					else{ 
-						if(markerPoints.size()==2){
-							options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
-						}
-					}
-						// Add marker al map
-					mGoogleMap.addMarker(options);
-					
-					// Checks, whether start and end locations are captured
-					if(markerPoints.size() >= 2)
-					{					
-						fromPosition = markerPoints.get(0);
-						toPosition = markerPoints.get(1);
-						
-			        	HelpRute help = new HelpRute();
-			        	help.execute();
-			        }
-				}
-			});
+          
           
     }
     	
@@ -299,7 +213,7 @@ public class MainActivity extends FragmentActivity
 			ArrayList<LatLng> listPoint;
 			
 			listPoint = getRoute.get_route(fromPosition,toPosition,puntosDeBloqueo);
-			
+			puntosDeLaRuta = listPoint;
 			if(listPoint!=null)
 			{
 				for (int i = 0; i < listPoint.size(); i++) {
@@ -574,9 +488,170 @@ public class MainActivity extends FragmentActivity
         }
     }
     
-    public void iniciar_recorrido()
+    public void iniciar_recorrido(View v)
     {
+    	//puntosDeLaRuta
+    	if (puntosDeLaRuta.size() == 0) {
+    		mGoogleMap.setOnMapClickListener(new OnMapClickListener() 
+        	{
+        			
+          	  
+    			@Override
+    			public void onMapClick(LatLng point) 
+    			{
+    				
+    				// tam 2 o mayor LIMPIAR			
+    				if(markerPoints.size()>1)
+    				{
+    					markerPoints.clear();
+    					mGoogleMap.clear();					
+    				}
+    					// adicionar punto
+    				markerPoints.add(point);
+    					// crear MarkerOptions
+    				MarkerOptions options = new MarkerOptions();
+    					// ajustar la pos del marker
+    				options.position(point);
+    					//color marker
+    				if(markerPoints.size()==1){
+    					options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+    				}
+    				else{ 
+    					if(markerPoints.size()==2){
+    						options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
+    					}
+    				}
+    					// Add marker al map
+    				mGoogleMap.addMarker(options);
+    				
+    				// Checks, whether start and end locations are captured
+    				if(markerPoints.size() >= 2)
+    				{					
+    					fromPosition = markerPoints.get(0);
+    					toPosition = markerPoints.get(1);
+    					
+    		        	HelpRute help = new HelpRute();
+    		        	help.execute();
+    		        	//mGoogleMap.setOnMapClickListener(null);
+    		        	
+    		        }
+    				
+    				
+    			}
+    		});
+		}
+    	else {
+    		    	double latitude = mGoogleMap.getMyLocation().getLatitude();
+    				double longitude = mGoogleMap.getMyLocation().getLongitude();
+    				LatLng myPos = new LatLng(latitude, longitude);
+    				
+    	    		getRouteTask2 help = new getRouteTask2();
+    	    		
+    	    		int res = help.verificarMyPosCercaCamino(puntosDeLaRuta.get(puntosDeLaRuta.size()-4),puntosDeLaRuta);
+    	    		//while(res != -1){
+    	    			double grados;
+    	    			if (puntosDeLaRuta.size() > res+1) {
+    	    				double pendiente = (( puntosDeLaRuta.get(res+1).longitude-puntosDeLaRuta.get(res).longitude)/(puntosDeLaRuta.get(res+1).latitude-puntosDeLaRuta.get(res).latitude));
+    	    				grados =Math.toDegrees( Math.atan(pendiente) );
+    	    				int x = (int) (grados);
+    	    				
+    	    				//if (grados<0) {	grados = grados-270; grados = grados*-1;	}
+    	    				//else{ 	grados = 90-grados; }
+    	    				
+    	    				if (puntosDeLaRuta.get(res).latitude<puntosDeLaRuta.get(res+1).latitude &  puntosDeLaRuta.get(res).longitude<puntosDeLaRuta.get(res+1).longitude) {
+								x = 90-x;
+							}
+    	    				else{
+    	    					if (puntosDeLaRuta.get(res).latitude>puntosDeLaRuta.get(res+1).latitude &  puntosDeLaRuta.get(res).longitude>puntosDeLaRuta.get(res+1).longitude) {
+    								x = (90-x)+180;
+    							}
+    	    					else{
+    	    						if (puntosDeLaRuta.get(res).latitude>puntosDeLaRuta.get(res+1).latitude & puntosDeLaRuta.get(res).longitude<puntosDeLaRuta.get(res+1).longitude) {
+        								x = ((x*(-1))+270); 
+        							}
+    	    						else{
+    	    							x = (x*(-1))+90;
+    	    						}
+    	    					}
+    	    				}
+    	    				
+    	    				
+    	    				try 
+    	    				{
+    	    					CameraPosition cameraPosition = new CameraPosition.Builder().target(puntosDeLaRuta.get(res)).zoom(20).bearing(270).tilt(10).build();
+    	        	            mGoogleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+    						} catch (Exception e) {
+    							// TODO: handle exception
+    							System.out.println(e.getMessage());
+    						}
+    	    				
+    					}
+    	    		//}
+    	}
+    
+    }
+    public void nose()
+    {
+    	mGoogleMap.setOnMapClickListener(new OnMapClickListener(){
+			
+      	  
+			@Override
+			public void onMapClick(LatLng point) 
+			{
     	
+		    	if(homeFalse == "llenar")
+				{
+					markerPoints.clear();
+					mGoogleMap.clear();
+					home = point;
+					MarkerOptions options = new MarkerOptions();
+					options.position(point);
+					options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA));
+					mGoogleMap.addMarker(options);
+					homeFalse = "oto";
+					
+					ayudaServicios servicios = new ayudaServicios();
+					servicios.guardarPunto("casa", codigo_usuario, home.latitude,home.longitude);
+					return;
+				}
+				if(workFalse == "llenar")
+				{
+					markerPoints.clear();
+					mGoogleMap.clear();
+					work = point;
+					MarkerOptions options = new MarkerOptions();
+					options.position(point);
+					options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA));
+					mGoogleMap.addMarker(options);
+					workFalse = "oto";
+					
+					ayudaServicios servicios = new ayudaServicios();
+					servicios.guardarPunto("trabajo", codigo_usuario, work.latitude,work.longitude);
+					return;
+				}
+				if(bloqueoFalse == "llenar")
+				{
+					markerPoints.clear();
+					mGoogleMap.clear();
+					//bloqueo = point;
+					puntosDeBloqueo.add(point);
+					
+					for(int i=0 ; i<puntosDeBloqueo.size() ; i++)
+					{
+						markerOptions.position(puntosDeBloqueo.get(i));
+						markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
+						mGoogleMap.addMarker(markerOptions);
+					}
+					
+					bloqueoFalse = "false";
+					
+					ayudaServicios servicios = new ayudaServicios();
+					servicios.guardarPuntoBloqueo(codigo_usuario, point.latitude,point.longitude);
+					return;
+				}
+			}
+		
+    	});
     }
     
 }
