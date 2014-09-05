@@ -19,6 +19,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnCameraChangeListener;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
+import com.google.android.gms.maps.model.CameraPositionCreator;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -33,6 +34,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.app.Application;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.graphics.Color;
@@ -43,6 +45,7 @@ import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.view.*;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
@@ -96,6 +99,9 @@ public class MainActivity extends FragmentActivity
     GoogleMap mGoogleMap;
     MarkerOptions markerOptions;
     Location location ;
+    
+    //borrar
+    int punteroRuta;
 	
     @Override
     protected void onCreate(Bundle savedInstanceState) 
@@ -232,6 +238,12 @@ public class MainActivity extends FragmentActivity
 			{
 				markerOptions.position(puntosDeBloqueo.get(i));
 				markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
+				mGoogleMap.addMarker(markerOptions);
+			}
+			for(int i=0 ; i<puntosDeLaRuta.size() ; i++)
+			{
+				markerOptions.position(puntosDeLaRuta.get(i));
+				markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE));
 				mGoogleMap.addMarker(markerOptions);
 			}
 			markerOptions.position(fromPosition);
@@ -529,10 +541,13 @@ public class MainActivity extends FragmentActivity
     				{					
     					fromPosition = markerPoints.get(0);
     					toPosition = markerPoints.get(1);
+    					System.out.println("punto 1= "+fromPosition.latitude+"--"+fromPosition.longitude);
+    					System.out.println("punto 1= "+toPosition.latitude+"--"+toPosition.longitude);
     					
     		        	HelpRute help = new HelpRute();
     		        	help.execute();
-    		        	//mGoogleMap.setOnMapClickListener(null);
+    		        	punteroRuta = 0;
+    		        	mGoogleMap.setOnMapClickListener(null);
     		        	
     		        }
     				
@@ -547,46 +562,62 @@ public class MainActivity extends FragmentActivity
     				
     	    		getRouteTask2 help = new getRouteTask2();
     	    		
-    	    		int res = help.verificarMyPosCercaCamino(puntosDeLaRuta.get(puntosDeLaRuta.size()-4),puntosDeLaRuta);
-    	    		//while(res != -1){
-    	    			double grados;
-    	    			if (puntosDeLaRuta.size() > res+1) {
-    	    				double pendiente = (( puntosDeLaRuta.get(res+1).longitude-puntosDeLaRuta.get(res).longitude)/(puntosDeLaRuta.get(res+1).latitude-puntosDeLaRuta.get(res).latitude));
-    	    				grados =Math.toDegrees( Math.atan(pendiente) );
-    	    				int x = (int) (grados);
-    	    				
-    	    				//if (grados<0) {	grados = grados-270; grados = grados*-1;	}
-    	    				//else{ 	grados = 90-grados; }
-    	    				
-    	    				if (puntosDeLaRuta.get(res).latitude<puntosDeLaRuta.get(res+1).latitude &  puntosDeLaRuta.get(res).longitude<puntosDeLaRuta.get(res+1).longitude) {
-								x = 90-x;
-							}
-    	    				else{
-    	    					if (puntosDeLaRuta.get(res).latitude>puntosDeLaRuta.get(res+1).latitude &  puntosDeLaRuta.get(res).longitude>puntosDeLaRuta.get(res+1).longitude) {
-    								x = (90-x)+180;
-    							}
-    	    					else{
-    	    						if (puntosDeLaRuta.get(res).latitude>puntosDeLaRuta.get(res+1).latitude & puntosDeLaRuta.get(res).longitude<puntosDeLaRuta.get(res+1).longitude) {
-        								x = ((x*(-1))+270); 
-        							}
-    	    						else{
-    	    							x = (x*(-1))+90;
-    	    						}
-    	    					}
-    	    				}
-    	    				
-    	    				
-    	    				try 
-    	    				{
-    	    					CameraPosition cameraPosition = new CameraPosition.Builder().target(puntosDeLaRuta.get(res)).zoom(20).bearing(270).tilt(10).build();
-    	        	            mGoogleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
-    						} catch (Exception e) {
-    							// TODO: handle exception
-    							System.out.println(e.getMessage());
-    						}
-    	    				
-    					}
-    	    		//}
+    	    		int res = punteroRuta;
+    	    		
+    	    		if (puntosDeLaRuta.size() > res+1) {
+    	    			
+        	    		//int res = help.verificarMyPosCercaCamino(puntosDeLaRuta.get(puntosDeLaRuta.size()-4),puntosDeLaRuta);
+        	    		
+        	    		double x1 = puntosDeLaRuta.get(res).latitude;
+        	    		double y1 = puntosDeLaRuta.get(res).longitude;
+        	    		
+        	    		double x2 = puntosDeLaRuta.get(res+1).latitude;
+        	    		double y2 = puntosDeLaRuta.get(res+1).longitude;
+        	    		
+        	    		double m = ((y2 - y1)/(x2-x1));
+        	    		
+        	    		System.out.println("pendiente recta: "+m);
+        	    		
+        	    		double atamm = Math.atan(m);
+        	    		double grados = Math.toDegrees(atamm);
+        	    		
+        	    		System.out.println("atan: "+atamm);
+        	    		System.out.println("grados1: "+grados);
+        	    		
+        	    		
+        	    		int x = (int) (grados);
+        	    		System.out.println("grados2: "+x);
+    	    			
+        	    		if (x1<x2 &  y1<y2) {
+        	    			x = x;
+        	    		}
+        	    		else{
+        	    			if (x1>x2 &  y1>y2) {
+        	    				x = (x)+180;
+        	    			}
+        	    			else{
+        	    				if (x1>x2 &  y1<y2) {
+        	    					x = (90-x)+90;
+        	    				}
+        	    				else{
+        	    					x = 360+x;
+        	    				}
+        	    			}
+        	    		}
+	    	    		try 
+	    				{
+	    					System.out.println("vamos: "+x);
+	    					
+	    					CameraPosition cameraPosition2 = new CameraPosition.Builder().target(puntosDeLaRuta.get(res)).zoom(17).bearing(x).tilt(30).build();
+	        	            mGoogleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition2));
+	        	            punteroRuta+=1;
+						} catch (Exception e) {
+							// TODO: handle exception
+							System.out.println(e.getMessage());
+						}
+    	    		}
+    	    		
+    	    		
     	}
     
     }
