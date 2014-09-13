@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.concurrent.TimeoutException;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
@@ -20,13 +21,15 @@ import com.google.android.gms.maps.model.LatLng;
 import android.R.string;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.Context;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.widget.TextView;
+import android.widget.Toast;
 
 @SuppressLint("NewApi")
 public class ayudaServicios {
-	String url = "http://192.168.100.127:8080/com.maps/sample/puntos";
+	String url = "http://10.0.0.6:8080/com.maps/sample/puntos";
 	
 	public JSONArray guardarPunto(String tipo,String usuario,double latitude, double longitude) {
 		
@@ -110,7 +113,7 @@ public class ayudaServicios {
 
 			jsonArray = new JSONArray(jsonResult);
 			return jsonArray;
-		} 
+		}
 		catch (ClientProtocolException e) 
 		{
 			e.printStackTrace();

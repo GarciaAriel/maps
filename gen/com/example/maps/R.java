@@ -1278,7 +1278,7 @@ containing a value of this type.
         public static final int ic_plusone_tall_off_client=0x7f020073;
     }
     public static final class id {
-        public static final int _ini_ruta=0x7f060042;
+        public static final int _ini_ruta=0x7f060041;
         public static final int action_bar=0x7f06001f;
         public static final int action_bar_activity_content=0x7f060018;
         public static final int action_bar_container=0x7f06001e;
@@ -1292,7 +1292,6 @@ containing a value of this type.
         public static final int action_mode_close_button=0x7f060027;
         public static final int activity_chooser_view_content=0x7f060028;
         public static final int activity_main_content_button_menu=0x7f060040;
-        public static final int activity_main_content_title=0x7f060041;
         public static final int activity_main_menu_listview=0x7f06003f;
         public static final int always=0x7f06000f;
         public static final int beginning=0x7f060014;
@@ -1346,6 +1345,7 @@ containing a value of this type.
         public static final int tabMode=0x7f060006;
         public static final int terrain=0x7f060003;
         public static final int title=0x7f06002e;
+        public static final int toggleButton1=0x7f060042;
         public static final int top_action_bar=0x7f060023;
         public static final int up=0x7f060024;
         public static final int useLogo=0x7f060007;

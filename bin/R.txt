@@ -293,7 +293,7 @@ int drawable ic_plusone_medium_off_client 0x7f020070
 int drawable ic_plusone_small_off_client 0x7f020071
 int drawable ic_plusone_standard_off_client 0x7f020072
 int drawable ic_plusone_tall_off_client 0x7f020073
-int id _ini_ruta 0x7f060042
+int id _ini_ruta 0x7f060041
 int id action_bar 0x7f06001f
 int id action_bar_activity_content 0x7f060018
 int id action_bar_container 0x7f06001e
@@ -307,7 +307,6 @@ int id action_menu_presenter 0x7f06001a
 int id action_mode_close_button 0x7f060027
 int id activity_chooser_view_content 0x7f060028
 int id activity_main_content_button_menu 0x7f060040
-int id activity_main_content_title 0x7f060041
 int id activity_main_menu_listview 0x7f06003f
 int id always 0x7f06000f
 int id beginning 0x7f060014
@@ -361,6 +360,7 @@ int id submit_area 0x7f06003c
 int id tabMode 0x7f060006
 int id terrain 0x7f060003
 int id title 0x7f06002e
+int id toggleButton1 0x7f060042
 int id top_action_bar 0x7f060023
 int id up 0x7f060024
 int id useLogo 0x7f060007
