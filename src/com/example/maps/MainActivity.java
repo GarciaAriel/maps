@@ -36,10 +36,13 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v7.widget.PopupMenu;
+import android.app.AlertDialog;
 import android.app.Application;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.graphics.Color;
+import android.graphics.SumPathEffect;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.location.LocationManager;
@@ -49,6 +52,7 @@ import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.SystemClock;
 import android.view.*;
 import android.view.View.OnClickListener;
@@ -67,16 +71,17 @@ import android.widget.ToggleButton;
 public class MainActivity extends FragmentActivity 
 {
 	
-	// The MainLayout which will hold both the sliding menu and our main content
-    // Main content will holds our Fragment respectively
-    MainLayout mainLayout;
+	MainLayout mainLayout;
     
     // ListView menu
     private ListView lvMenu;
     private String[] lvMenuItems;
+    private ListView lvMenuRight;
+    private String[] lvMenuItemsRight;
     
     // Menu button
     Button btMenu;
+    Button btMenuRight;
     
     
     // Title according to fragment
@@ -108,6 +113,7 @@ public class MainActivity extends FragmentActivity
     MarkerOptions markerOptions;
     Location location ;
     ToggleButton toggleButton1;
+    final Context context = this;
     
     //borrar
     int punteroRuta;
@@ -115,6 +121,12 @@ public class MainActivity extends FragmentActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) 
     {
+    	//ocultar nombre app y dibujo
+    	requestWindowFeature(Window.FEATURE_NO_TITLE);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+            WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        
+        //mac address como codigo de dispositivo
     	WifiManager wifiMan = (WifiManager) this.getSystemService(Context.WIFI_SERVICE);
 		WifiInfo wifiInf = wifiMan.getConnectionInfo();
 		codigo_usuario = wifiInf.getMacAddress();
@@ -129,31 +141,41 @@ public class MainActivity extends FragmentActivity
         
      // Init menu
         lvMenuItems = getResources().getStringArray(R.array.menu_items);
-        lvMenu = (ListView) findViewById(R.id.activity_main_menu_listview);
-        lvMenu.setAdapter(new ArrayAdapter<String>(this,
-                android.R.layout.simple_list_item_1, lvMenuItems));
-        lvMenu.setOnItemClickListener(new OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                try {
-					onMenuItemClick(parent, view, position, id);
-				} catch (JSONException e) {
-					
-					e.printStackTrace();
-				}
-            }
-            
-        });
+        final ArrayAdapter<String> array0 =new ArrayAdapter<String>(this,
+                android.R.layout.simple_list_item_1, lvMenuItems); 
         
+     // Init menu right
+        lvMenuItemsRight = getResources().getStringArray(R.array.menu_items_right);
+        final ArrayAdapter<String> array = new ArrayAdapter<String>(this,
+        		android.R.layout.simple_list_item_1, lvMenuItemsRight);
+           
      // Get menu button
         btMenu = (Button) findViewById(R.id.activity_main_content_button_menu);
         btMenu.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Show/hide the menu
-                toggleMenu(v);
+            	lvMenu = (ListView) findViewById(R.id.activity_main_menu_listview);
+                lvMenu.setAdapter(array0);
+                lvMenu.setOnItemClickListener(new OnItemClickListener() {
+                    @Override
+                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                        try {
+        					onMenuItemClick(parent, view, position, id);
+        				} catch (JSONException e) {
+        					
+        					e.printStackTrace();
+        				}
+                    }
+                    
+                });
+            	// Show/hide the menu
+            	toggleMenu(v);
             }
         });
+        
+        
+     // Get title textview
+        tvTitle = (TextView) findViewById(R.id.activity_main_content_title);
         
         toggleButton1 = (ToggleButton) findViewById(R.id.toggleButton1);
         toggleButton1.setOnClickListener(new OnClickListener() {
@@ -161,21 +183,36 @@ public class MainActivity extends FragmentActivity
 			@Override
 			public void onClick(View v) {
 				// TODO Auto-generated method stub
-				methodChangeMode(v);
+				
+            	if (toggleButton1.isChecked()) {
+            		toggleMenuRight(v);
+            		lvMenuRight = (ListView) findViewById(R.id.activity_main_menu_listview);
+                    lvMenuRight.setAdapter(array);
+                    lvMenuRight.setOnItemClickListener(new OnItemClickListener() {
+                        @Override
+                        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                            try {
+            					onMenuItemClickRight(parent, view, position, id);
+            				} catch (JSONException e) {
+            					
+            					e.printStackTrace();
+            				}
+                        }
+                        
+                    });
+				}
+            	else
+            	{
+            		methodChangeMode(v);
+            	}
+            	//methodChangeMode(v);
 			}
 		});
-        
-        // Get title textview
-        //tvTitle = (TextView) findViewById(R.id.activity_main_content_title);
-        
         
         // Add FragmentMain as the initial fragment       
         FragmentManager fm = MainActivity.this.getSupportFragmentManager();
         FragmentTransaction ft = fm.beginTransaction();
-//        
-//        FragmentMain fragment = new FragmentMain();
-//        ft.add(R.id.activity_main_content_fragment, fragment);
-//        ft.commit();
+        
         
       //================================================
         
@@ -184,21 +221,17 @@ public class MainActivity extends FragmentActivity
 //        
         v2GetRouteDirection = new GMapV2GetRouteDirection();
         SupportMapFragment supportMapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
-          mGoogleMap = supportMapFragment.getMap();
-          
+        mGoogleMap = supportMapFragment.getMap();
 
           //map = new google.maps.Map2(document.getElementById("map_canvas"));
-          CameraUpdate center=CameraUpdateFactory.newLatLng(new LatLng(-17.393792, -66.157110));
-          CameraUpdate zoom=CameraUpdateFactory.zoomTo(12);
+        CameraUpdate center=CameraUpdateFactory.newLatLng(new LatLng(-17.393792, -66.157110));
+        CameraUpdate zoom=CameraUpdateFactory.zoomTo(12);
           //CameraUpdate zoom=CameraUpdateFactory.zoomTo(15);
           
-          mGoogleMap.moveCamera(center);
-          mGoogleMap.animateCamera(zoom);
+        mGoogleMap.moveCamera(center);
+        mGoogleMap.animateCamera(zoom);
           
-//00000000000000000000000
-          
-          //00000000000000000000
-          
+//0000000000000000000000000000000000000000000
           
           // Enabling MyLocation in Google Map
           
@@ -211,50 +244,18 @@ public class MainActivity extends FragmentActivity
           mGoogleMap.animateCamera(CameraUpdateFactory.zoomTo(12));
           markerOptions = new MarkerOptions();
           
-          
-          
           //provando la conexion servicios
           
           
-//          ser se = new ser();
-//          se.execute();
+          connectVerify se = new connectVerify();
+          se.execute();
           
-             //ver al inicio los puntos debloqueo
-//          try {
-//        	  ProgressDialog sddf;
-//        	  sddf = new ProgressDialog(MainActivity.this);
-//			  sddf.setMessage("No es posible iniciar la apppppppppppppp");
-//			  sddf.show();
-//        	  
-//        	  //ayudaServicios help = new ayudaServicios();
-//              //puntosDeBloqueo = help.getPuntosBloqueoPersistente();
-//              for(int i=0 ; i<puntosDeBloqueo.size() ; i++)
-//	  			{
-//	  				markerOptions.position(puntosDeBloqueo.get(i));
-//	  				markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
-//	  				mGoogleMap.addMarker(markerOptions);
-//	  			}
-//		  } catch (Exception e) {
-//			  Context context = getApplicationContext();
-//			  CharSequence text = "Hello toast!";
-//			  int duration = Toast.LENGTH_SHORT;
-//
-//			  Toast toast = Toast.makeText(context, text, duration);
-//			  toast.show();
-//
-//			    
-//				System.out.println("ver puntos bloqueo inicio");
-//				super.onStop();
-//		        finish();
-//		  }
-          
+
     }
     	
 //000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 
-    
-    
-    private class ser extends AsyncTask<String, Void, String>
+    private class connectVerify extends AsyncTask<String, Void, String>
     {
     	private ProgressDialog Dialog;
     	boolean res=false;
@@ -266,8 +267,8 @@ public class MainActivity extends FragmentActivity
 
 	            if (netInfo != null && netInfo.isConnected())
 	            {
-	                //URL url = new URL("http://www.Google.com/");
-	            	URL url = new URL("http://127.0.0.1:8080/com.maps/sample/puntos/getPunto/no/no");
+	                URL url = new URL("http://www.Google.com/");
+	            	//URL url = new URL("http://127.0.0.1:8080/com.maps/sample/puntos/getPunto/no/no");
 	                HttpURLConnection urlc = (HttpURLConnection) url.openConnection();
 	                urlc.setRequestProperty("Connection", "close");
 	                urlc.setConnectTimeout(3000); // Timeout 2 seconds.
@@ -289,8 +290,17 @@ public class MainActivity extends FragmentActivity
         protected void onPostExecute(String result) {
 			if (res==false) {
 				Dialog = new ProgressDialog(MainActivity.this);
-                Dialog.setMessage("no conexion adios");
+                Dialog.setMessage("No se tiene conexion a Internet. ADIOS...");
                 Dialog.show();
+                
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                    	onStop();
+                    	finish();
+                    }
+                }, 5000);
+                
 			}
 			else
 			{
@@ -300,7 +310,7 @@ public class MainActivity extends FragmentActivity
 			}
 		}
     }
-    private class HelpRute extends AsyncTask<String, Void, String>
+    private class obtainRoute extends AsyncTask<String, Void, String>
     {
     	private ProgressDialog Dialog;
         String response = "";
@@ -317,8 +327,8 @@ public class MainActivity extends FragmentActivity
 			} catch (Exception e) {
 				Dialog = new ProgressDialog(MainActivity.this);
                 Dialog.setMessage("en pre execute");
-                
-                finish();
+                onStop();
+                //finish();
 			}
         	  
         }
@@ -356,12 +366,12 @@ public class MainActivity extends FragmentActivity
 					markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
 					mGoogleMap.addMarker(markerOptions);
 				}
-				for(int i=0 ; i<puntosDeLaRuta.size() ; i++)
-				{
-					markerOptions.position(puntosDeLaRuta.get(i));
-					markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE));
-					mGoogleMap.addMarker(markerOptions);
-				}
+//				for(int i=0 ; i<puntosDeLaRuta.size() ; i++)
+//				{
+//					markerOptions.position(puntosDeLaRuta.get(i));
+//					markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE));
+//					mGoogleMap.addMarker(markerOptions);
+//				}
 				markerOptions.position(fromPosition);
 				markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
 				mGoogleMap.addMarker(markerOptions);
@@ -391,13 +401,12 @@ public class MainActivity extends FragmentActivity
   @Override
   protected void onStop() {
         super.onStop();
-        finish();
+        //finish();
   }
     
   @Override
   protected void onRestart() {
       super.onRestart();  // Always call the superclass method first
-      
       // Activity being restarted from stopped state    
   }
   
@@ -485,6 +494,11 @@ public class MainActivity extends FragmentActivity
     public void toggleMenu(View v){
         mainLayout.toggleMenu();
     }
+    public void toggleMenuRight(View v){
+        mainLayout.toggleMenu();
+    }
+    
+    
     
     
     
@@ -525,7 +539,7 @@ public class MainActivity extends FragmentActivity
 			} catch (Exception e) {
 				Toast.makeText(this,"menu get punto casa", Toast.LENGTH_LONG).show();
 				super.onStop();
-		        finish();
+		        //finish();
 			}
         	
         	if(puntoCasaJson.length() == 0) 	
@@ -547,7 +561,7 @@ public class MainActivity extends FragmentActivity
         		
         		toPosition = new LatLng(lat, lon);
         		
-        		HelpRute help = new HelpRute();
+        		obtainRoute help = new obtainRoute();
 	        	help.execute(ok);
 
     		}
@@ -562,7 +576,7 @@ public class MainActivity extends FragmentActivity
 				} catch (Exception e) {
 					Toast.makeText(this,"menu get punto trabajo", Toast.LENGTH_LONG).show();
 					super.onStop();
-			        finish();
+			      //  finish();
 				}
         		
 			
@@ -586,7 +600,7 @@ public class MainActivity extends FragmentActivity
         		
         			toPosition = new LatLng(lat, lon);
     				
-        			HelpRute help = new HelpRute();
+        			obtainRoute help = new obtainRoute();
         			help.execute(ok);
         		}
         	}
@@ -602,7 +616,7 @@ public class MainActivity extends FragmentActivity
 					} catch (Exception e) {
 						Toast.makeText(this,"menu compartir punto bloqueo", Toast.LENGTH_LONG).show();
 						super.onStop();
-				        finish();
+				    //    finish();
 					}
         		}
         
@@ -613,6 +627,58 @@ public class MainActivity extends FragmentActivity
         
         // Hide menu anyway
         mainLayout.toggleMenu();
+    }
+    
+private void onMenuItemClickRight(AdapterView<?> parent, View view, int position, long id) throws JSONException {
+    	
+    	String selectedItem = lvMenuItemsRight[position];
+        String currentItem = tvTitle.getText().toString();
+        
+        // Do nothing if selectedItem is currentItem
+        if(selectedItem.compareTo(currentItem) == 0) {
+            mainLayout.toggleMenuRight();
+            return;
+        }
+            
+        FragmentManager fm = MainActivity.this.getSupportFragmentManager();
+        FragmentTransaction ft = fm.beginTransaction();
+        Fragment fragment = null;
+
+        
+        if(selectedItem.compareTo("Tomar mi punto como origen") == 0) 
+        {
+        	
+        	//poner punto inicio mi localizacion
+        		Toast.makeText(this,"Selecciones el punto de destino", Toast.LENGTH_LONG).show();
+        		double latitude = mGoogleMap.getMyLocation().getLatitude();
+        		double longitude = mGoogleMap.getMyLocation().getLongitude();
+        		LatLng Position = new LatLng(latitude, longitude);
+        		fromPosition = Position;
+        		markerPoints.add(Position);
+        	//marker
+        		MarkerOptions options = new MarkerOptions();
+            	options.position(Position);
+            	options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+            	mGoogleMap.addMarker(options);
+        	//put lisener para el segundo punto
+        		methodChangeMode(view);
+            	
+            		
+        } 
+        else 
+        	if(selectedItem.compareTo("Seleccionar dos puntos") == 0) 
+        		{
+        			Toast.makeText(this,"Seleccione el punto origen", Toast.LENGTH_LONG).show();
+        			methodChangeMode(view);
+        		}
+        
+        	if(fragment != null) 
+        	{
+            	tvTitle.setText(selectedItem);
+        	}
+        
+        // Hide menu anyway
+        mainLayout.toggleMenuRight();
     }
 
     
@@ -638,17 +704,16 @@ public class MainActivity extends FragmentActivity
     
     public void methodChangeMode(View v)
     {
+    	
     	try {
     		toggleButton1 = (ToggleButton)findViewById(R.id.toggleButton1);
     		if (toggleButton1.isChecked()) {
-        		Toast.makeText(this,"Seleccione dos Puntos", Toast.LENGTH_LONG).show();
         		mGoogleMap.setOnMapClickListener(new OnMapClickListener() 
             	{
             	  
         			@Override
         			public void onMapClick(LatLng point) 
         			{
-        				
         				// tam 2 o mayor LIMPIAR			
         				if(markerPoints.size()>1)
         				{
@@ -663,6 +728,8 @@ public class MainActivity extends FragmentActivity
         				options.position(point);
         					//color marker
         				if(markerPoints.size()==1){
+        					Toast.makeText(context, "Seleccione el punto destino", Toast.LENGTH_LONG).show();
+        					
         					options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
         				}
         				else{ 
@@ -673,15 +740,14 @@ public class MainActivity extends FragmentActivity
         					// Add marker al map
         				mGoogleMap.addMarker(options);
         				
-        				// Checks, whether start and end locations are captured
         				if(markerPoints.size() >= 2)
-        				{					
+        				{		
+        					
+        					//Toast.makeText(this,"Seleccione el punto destino", Toast.LENGTH_LONG).show();
         					fromPosition = markerPoints.get(0);
         					toPosition = markerPoints.get(1);
-        					System.out.println("punto 1= "+fromPosition.latitude+"--"+fromPosition.longitude);
-        					System.out.println("punto 1= "+toPosition.latitude+"--"+toPosition.longitude);
         					
-        		        	HelpRute help = new HelpRute();
+        		        	obtainRoute help = new obtainRoute();
         		        	help.execute();
         		        	punteroRuta = 0;
         		        	mGoogleMap.setOnMapClickListener(null);
@@ -696,6 +762,7 @@ public class MainActivity extends FragmentActivity
         		});
     		}
         	else{
+        		markerPoints.clear();
         		puntosDeLaRuta.clear();
         		mGoogleMap.clear();
         		mGoogleMap.setOnMapClickListener(null);
@@ -705,6 +772,18 @@ public class MainActivity extends FragmentActivity
         		
                 Button start_rute = (Button)findViewById(R.id._ini_ruta);
 	        	start_rute.setVisibility(View.INVISIBLE);
+	        	
+	             //ver al inicio los puntos debloqueo
+
+	          	  //ayudaServicios help = new ayudaServicios();
+	                //puntosDeBloqueo = help.getPuntosBloqueoPersistente();
+	                for(int i=0 ; i<puntosDeBloqueo.size() ; i++)
+	  	  			{
+	  	  				markerOptions.position(puntosDeBloqueo.get(i));
+	  	  				markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
+	  	  				mGoogleMap.addMarker(markerOptions);
+	  	  			}
+
         	}
 		} catch (Exception e) {
 			e.getMessage();
@@ -788,7 +867,7 @@ public class MainActivity extends FragmentActivity
 				{
 					System.out.println("vamos: "+x);
 					
-					CameraPosition cameraPosition2 = new CameraPosition.Builder().target(puntosDeLaRuta.get(res)).zoom(17).bearing(x).tilt(30).build();
+					CameraPosition cameraPosition2 = new CameraPosition.Builder().target(puntosDeLaRuta.get(res)).zoom(19).bearing(x).tilt(45).build();
     	            mGoogleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition2));
     	            punteroRuta+=1;
 				} catch (Exception e) {
@@ -827,8 +906,8 @@ public class MainActivity extends FragmentActivity
 						servicios.guardarPunto("casa", codigo_usuario, home.latitude,home.longitude);
 					} catch (Exception e) {
 						System.out.println("hiloSecundarioMenu  home");
-						//super.onStop();
-				        finish();
+						onStop();
+				        //finish();
 					}
 					
 					return;
@@ -849,7 +928,8 @@ public class MainActivity extends FragmentActivity
 						servicios.guardarPunto("trabajo", codigo_usuario, work.latitude,work.longitude);
 					} catch (Exception e) {
 						System.out.println("hiloSecundarioMenu  work");
-						finish();
+						onStop();
+						//finish();
 					}
 					
 					return;
@@ -875,7 +955,8 @@ public class MainActivity extends FragmentActivity
 						servicios.guardarPuntoBloqueo(codigo_usuario, point.latitude,point.longitude);
 					} catch (Exception e) {
 						System.out.println("hiloSecundarioMenu  bloqueo");
-						finish();
+						onStop();
+						//finish();
 					}
 					
 					return;

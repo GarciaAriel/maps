@@ -1,7 +1,8 @@
 <com.entropy.slidingmenu2.layout.MainLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="horizontal" >
+    android:orientation="horizontal"
+    android:textColor="#FFFFFF" >
     
      <!-- This holds our menu -->
 
@@ -9,58 +10,85 @@
          xmlns:android="http://schemas.android.com/apk/res/android"
          android:layout_width="178dp"
          android:layout_height="match_parent"
-         android:orientation="vertical" >
-
+         android:orientation="vertical" 
+         android:textColor="#FFFFFF">
+         
+		<TextView  
+		    android:layout_width="fill_parent" 
+		    android:text="@string/sub_menu" 
+		    android:layout_height="wrap_content" 
+		    android:id="@+id/TextView01"/>
+		
         <ListView
             android:id="@+id/activity_main_menu_listview"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="#B4D609"
-            android:cacheColorHint="#00000000" >
+            android:background="#06646F"
+            android:textColor="#FFFFFF"
+            android:cacheColorHint="#00000000" 
+            >
+            
         </ListView>
     </LinearLayout>
     
     <!-- This holds our content-->
+
     <LinearLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical" >
-		
+
         <!-- This acts as Actionbar -->
+
         <LinearLayout
-	        android:layout_width="match_parent"
-	        android:layout_height="wrap_content"
-	        android:background="#96D6E3"
-	        android:orientation="horizontal" >
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#044951"
+            android:orientation="horizontal" >
 
             <Button
                 android:id="@+id/activity_main_content_button_menu"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="46dp"
+                android:layout_height="43dp"
+                android:background="@drawable/menu"
                 android:onClick="toggleMenu"
-                android:text="Menu" />
+                android:paddingBottom="4dp"
+                android:paddingLeft="4dp"
+                android:paddingRight="4dp"
+                android:paddingTop="4dp" />
+
+            <TextView
+                android:id="@+id/activity_main_content_title"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.66"
+                android:gravity="center"
+                android:text="@string/app_name"
+                android:visibility="gone" />
 
             <Button
                 android:id="@+id/_ini_ruta"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:onClick="iniciar_recorrido"
-                android:text="Dibujar Una Ruta"
+                android:text="Iniciar el Viaje"
                 android:visibility="invisible" />
 
             <ToggleButton
                 android:id="@+id/toggleButton1"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:checked="false"
-                android:textOn="Limpiar"
-    			android:textOff="Dibujar una Ruta"
+                android:gravity="right"
                 android:onClick="methodChangeMode"
-                android:text="ToggleButton" />
-            
-        </LinearLayout>       
-        
+                android:text="ToggleButton"
+                android:textColorLink="@android:color/black"
+                android:textOff="Dibujar una Ruta"
+                android:textOn="Limpiar" />
+
+        </LinearLayout>
+
         <!-- This is where fragment will show up -->
 
         <fragment
@@ -68,7 +96,26 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             class="com.google.android.gms.maps.SupportMapFragment" />
-        
+    </LinearLayout>
+    
+    <!-- This holds our menu right-->
+
+     <LinearLayout
+         xmlns:android="http://schemas.android.com/apk/res/android"
+         android:layout_width="178dp"
+         android:layout_height="match_parent"
+         android:orientation="vertical" 
+         android:textColor="#FFFFFF">
+
+        <ListView
+            android:id="@+id/activity_main_menu_listview_right"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#06646F"
+            android:textColor="#FFFFFF"
+            android:cacheColorHint="#00000000" 
+            >
+        </ListView>
     </LinearLayout>
 
 </com.entropy.slidingmenu2.layout.MainLayout>

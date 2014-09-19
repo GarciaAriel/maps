@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="menu_items_right">
+        
+        <item >Tomar mi punto como origen</item>
+        <item >Seleccionar dos puntos</item>
+        
+    </string-array>
+</resources>

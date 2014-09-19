@@ -18,6 +18,7 @@ public final class R {
     }
     public static final class array {
         public static final int menu_items=0x7f0c0000;
+        public static final int menu_items_right=0x7f0c0001;
     }
     public static final class attr {
         /**  Custom divider drawable to use for elements in the action bar. 
@@ -1276,9 +1277,11 @@ containing a value of this type.
         public static final int ic_plusone_small_off_client=0x7f020071;
         public static final int ic_plusone_standard_off_client=0x7f020072;
         public static final int ic_plusone_tall_off_client=0x7f020073;
+        public static final int menu=0x7f020074;
     }
     public static final class id {
-        public static final int _ini_ruta=0x7f060041;
+        public static final int TextView01=0x7f06003f;
+        public static final int _ini_ruta=0x7f060043;
         public static final int action_bar=0x7f06001f;
         public static final int action_bar_activity_content=0x7f060018;
         public static final int action_bar_container=0x7f06001e;
@@ -1291,8 +1294,10 @@ containing a value of this type.
         public static final int action_menu_presenter=0x7f06001a;
         public static final int action_mode_close_button=0x7f060027;
         public static final int activity_chooser_view_content=0x7f060028;
-        public static final int activity_main_content_button_menu=0x7f060040;
-        public static final int activity_main_menu_listview=0x7f06003f;
+        public static final int activity_main_content_button_menu=0x7f060041;
+        public static final int activity_main_content_title=0x7f060042;
+        public static final int activity_main_menu_listview=0x7f060040;
+        public static final int activity_main_menu_listview_right=0x7f060046;
         public static final int always=0x7f06000f;
         public static final int beginning=0x7f060014;
         public static final int checkbox=0x7f060030;
@@ -1305,19 +1310,19 @@ containing a value of this type.
         public static final int end=0x7f060016;
         public static final int expand_activities_button=0x7f060029;
         public static final int expanded_menu=0x7f06002f;
-        public static final int fragment_listview_listview=0x7f060044;
-        public static final int fragment_main_textview=0x7f060045;
+        public static final int fragment_listview_listview=0x7f060047;
+        public static final int fragment_main_textview=0x7f060048;
         public static final int home=0x7f060017;
         public static final int homeAsUp=0x7f060009;
         public static final int hybrid=0x7f060004;
         public static final int icon=0x7f06002d;
         public static final int ifRoom=0x7f06000e;
         public static final int image=0x7f06002a;
-        public static final int item1=0x7f060046;
-        public static final int item2=0x7f060047;
+        public static final int item1=0x7f060049;
+        public static final int item2=0x7f06004a;
         public static final int listMode=0x7f060005;
         public static final int list_item=0x7f06002c;
-        public static final int map=0x7f060043;
+        public static final int map=0x7f060045;
         public static final int middle=0x7f060015;
         public static final int never=0x7f06000d;
         public static final int none=0x7f060000;
@@ -1345,7 +1350,7 @@ containing a value of this type.
         public static final int tabMode=0x7f060006;
         public static final int terrain=0x7f060003;
         public static final int title=0x7f06002e;
-        public static final int toggleButton1=0x7f060042;
+        public static final int toggleButton1=0x7f060044;
         public static final int top_action_bar=0x7f060023;
         public static final int up=0x7f060024;
         public static final int useLogo=0x7f060007;
@@ -1552,6 +1557,7 @@ containing a value of this type.
         /**  Location client code resources (prefix with location_client) 
          */
         public static final int location_client_powered_by_google=0x7f07001a;
+        public static final int sub_menu=0x7f07002b;
     }
     public static final class style {
         /** 

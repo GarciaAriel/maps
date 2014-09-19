@@ -1,5 +1,6 @@
 package com.entropy.slidingmenu2.fragment;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;

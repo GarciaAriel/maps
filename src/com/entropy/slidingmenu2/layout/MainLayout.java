@@ -1,6 +1,7 @@
 package com.entropy.slidingmenu2.layout;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.os.Handler;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -152,6 +153,34 @@ public class MainLayout extends LinearLayout {
     
     // Custom methods for MainLayout
     
+ // Used to show/hide menu accordingly
+    public void toggleMenuRight() {
+        // Do nothing if sliding is in progress
+        if(currentMenuState == MenuState.HIDING || currentMenuState == MenuState.SHOWING)
+            return;
+        
+        switch(currentMenuState) {
+        case HIDDEN:
+            currentMenuState = MenuState.SHOWING;
+            menu.setVisibility(View.VISIBLE);
+            menuScroller.startScroll(0, 0, -(menu.getLayoutParams().width),
+                    0, SLIDING_DURATION);
+            break;
+        case SHOWN:
+            currentMenuState = MenuState.HIDING;
+            menuScroller.startScroll(contentXOffset, 0, -contentXOffset, 
+                    0, SLIDING_DURATION);
+            break;
+        default:
+            break;
+        }
+        
+        // Begin querying
+        menuHandler.postDelayed(menuRunnable, QUERY_INTERVAL);
+        
+        // Invalite this whole MainLayout, causing onLayout() to be called
+        this.invalidate();
+    }
     // Used to show/hide menu accordingly
     public void toggleMenu() {
         // Do nothing if sliding is in progress
