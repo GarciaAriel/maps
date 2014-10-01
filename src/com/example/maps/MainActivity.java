@@ -1,29 +1,21 @@
 package com.example.maps;
 
-import java.math.BigDecimal;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 
-import com.entropy.slidingmenu2.fragment.FragmentListView;
-import com.entropy.slidingmenu2.fragment.FragmentMain;
 import com.entropy.slidingmenu2.layout.MainLayout;
-import com.google.android.gms.internal.bl;
+
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.GoogleMap.OnCameraChangeListener;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
-import com.google.android.gms.maps.model.CameraPositionCreator;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -31,18 +23,13 @@ import com.google.android.gms.maps.GoogleMap.OnMapClickListener;
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.Overlay;
 
-import android.R.integer;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v7.widget.PopupMenu;
-import android.app.AlertDialog;
-import android.app.Application;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.graphics.Color;
-import android.graphics.SumPathEffect;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.location.LocationManager;
@@ -53,14 +40,12 @@ import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.SystemClock;
 import android.view.*;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.CompoundButton;
-import android.widget.CompoundButton.OnCheckedChangeListener;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -78,6 +63,7 @@ public class MainActivity extends FragmentActivity
     private String[] lvMenuItems;
     private ListView lvMenuRight;
     private String[] lvMenuItemsRight;
+    private boolean connectVerifyValue = false;
     
     // Menu button
     Button btMenu;
@@ -101,6 +87,7 @@ public class MainActivity extends FragmentActivity
     String workFalse= "false";
     //LatLng bloqueo;
     ArrayList<LatLng> puntosDeBloqueo = new ArrayList<LatLng>();
+    ArrayList<LatLng> puntosDeAlerta = new ArrayList<LatLng>();
     String bloqueoFalse= "false";
     String ok = "0";
     PolylineOptions rectLine = new PolylineOptions().width(10).color(Color.GREEN);
@@ -114,6 +101,7 @@ public class MainActivity extends FragmentActivity
     Location location ;
     ToggleButton toggleButton1;
     final Context context = this;
+    final Handler handler=new Handler();
     
     //borrar
     int punteroRuta;
@@ -141,8 +129,7 @@ public class MainActivity extends FragmentActivity
         
      // Init menu
         lvMenuItems = getResources().getStringArray(R.array.menu_items);
-        final ArrayAdapter<String> array0 =new ArrayAdapter<String>(this,
-                android.R.layout.simple_list_item_1, lvMenuItems); 
+        //final ArrayAdapter<String> array0 =new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1, lvMenuItems); 
         
      // Init menu right
         lvMenuItemsRight = getResources().getStringArray(R.array.menu_items_right);
@@ -154,20 +141,123 @@ public class MainActivity extends FragmentActivity
         btMenu.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
+            	//ocultar otro menu //mostrar otro
             	lvMenu = (ListView) findViewById(R.id.activity_main_menu_listview);
-                lvMenu.setAdapter(array0);
-                lvMenu.setOnItemClickListener(new OnItemClickListener() {
-                    @Override
-                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                        try {
-        					onMenuItemClick(parent, view, position, id);
-        				} catch (JSONException e) {
-        					
-        					e.printStackTrace();
-        				}
-                    }
-                    
-                });
+            	lvMenu.setVisibility(View.GONE);
+            	
+            	LinearLayout linear = (LinearLayout) findViewById(R.id.menu_options_1);
+				linear.setVisibility(View.VISIBLE);
+				LinearLayout linear1 = (LinearLayout) findViewById(R.id.menu_options_2);
+				linear1.setVisibility(View.VISIBLE);
+				LinearLayout linear2 = (LinearLayout) findViewById(R.id.menu_options_3);
+				linear2.setVisibility(View.VISIBLE);
+				
+				TextView text1 = (TextView) findViewById(R.id.TextView01);
+				text1.setVisibility(View.VISIBLE);
+				TextView text2 = (TextView) findViewById(R.id.TextView02);
+				text2.setVisibility(View.VISIBLE);
+				TextView text3 = (TextView) findViewById(R.id.TextView03);
+				text3.setVisibility(View.VISIBLE);
+            	// Show/hide the menu
+            	toggleMenu(v);
+            }
+        });
+        
+     // PUNTO FAVORITO CASA
+        Button btMenuHome10 = (Button) findViewById(R.id.button10);
+        btMenuHome10.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+            	try {
+					onHomeClick(v);
+				} catch (JSONException e) {
+					e.printStackTrace();
+				}
+            	// Show/hide the menu
+            	toggleMenu(v);
+            }
+        });
+     // PUNTO FAVORITO TRABAJO
+        Button btMenuWork11 = (Button) findViewById(R.id.button11);
+        btMenuWork11.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+            	try {
+            		onWorkClick(v);
+				} catch (JSONException e) {
+					e.printStackTrace();
+				}
+            	// Show/hide the menu
+            	toggleMenu(v);
+            }
+        });
+     // NOTIFICACION ACCIDENTE
+        Button btMenuAccident = (Button) findViewById(R.id.button13);
+        btMenuAccident.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+            	try {
+            		onAccidentClick(v);
+				} catch (JSONException e) {
+					e.printStackTrace();
+				}
+            	// Show/hide the menu
+            	toggleMenu(v);
+            }
+        });
+     // NOTIFICACION TRAFICO
+        Button btMenuTraffic = (Button) findViewById(R.id.button14);
+        btMenuTraffic.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+            	try {
+            		onTrafficClick(v);
+				} catch (JSONException e) {
+					e.printStackTrace();
+				}
+            	// Show/hide the menu
+            	toggleMenu(v);
+            }
+        });   
+     // NOTIFICACION REDADA
+        Button btMenuRaid = (Button) findViewById(R.id.button15);
+        btMenuRaid.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+            	try {
+            		onRaidClick(v);
+				} catch (JSONException e) {
+					e.printStackTrace();
+				}
+            	// Show/hide the menu
+            	toggleMenu(v);
+            }
+        });   
+        
+     // NOTIFICACION BLOQUEO MERCADO
+        Button btMenuMarket = (Button) findViewById(R.id.button16);
+        btMenuMarket.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+            	try {
+            		onMarketClick(v);
+				} catch (JSONException e) {
+					e.printStackTrace();
+				}
+            	// Show/hide the menu
+            	toggleMenu(v);
+            }
+        });
+     // NOTIFICACION BLOQUEO COLEGIO
+        Button btMenuSchool = (Button) findViewById(R.id.button17);
+        btMenuSchool.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+            	try {
+            		onSchoolClick(v);
+				} catch (JSONException e) {
+					e.printStackTrace();
+				}
             	// Show/hide the menu
             	toggleMenu(v);
             }
@@ -182,9 +272,28 @@ public class MainActivity extends FragmentActivity
 			
 			@Override
 			public void onClick(View v) {
+				//ocultar otro menu // ver otro
+				LinearLayout linear = (LinearLayout) findViewById(R.id.menu_options_1);
+				linear.setVisibility(View.GONE);
+				LinearLayout linear1 = (LinearLayout) findViewById(R.id.menu_options_2);
+				linear1.setVisibility(View.GONE);
+				LinearLayout linear2 = (LinearLayout) findViewById(R.id.menu_options_3);
+				linear2.setVisibility(View.GONE);
+				
+				TextView text1 = (TextView) findViewById(R.id.TextView01);
+				text1.setVisibility(View.GONE);
+				TextView text2 = (TextView) findViewById(R.id.TextView02);
+				text2.setVisibility(View.GONE);
+				TextView text3 = (TextView) findViewById(R.id.TextView03);
+				text3.setVisibility(View.GONE);
+				
+				lvMenu = (ListView) findViewById(R.id.activity_main_menu_listview);
+            	lvMenu.setVisibility(View.VISIBLE);
 				// TODO Auto-generated method stub
 				
             	if (toggleButton1.isChecked()) {
+            		TextView text = (TextView)findViewById(R.id.TextView01);
+                	text.setText("OPCIONES DE DIBUJO");
             		toggleMenuRight(v);
             		lvMenuRight = (ListView) findViewById(R.id.activity_main_menu_listview);
                     lvMenuRight.setAdapter(array);
@@ -250,15 +359,81 @@ public class MainActivity extends FragmentActivity
           connectVerify se = new connectVerify();
           se.execute();
           
+          
+          checkNotifications ceh = new checkNotifications();
+          ceh.execute();
+          
+          
+		  
+          
 
     }
     	
 //000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 
+    private class checkNotifications extends AsyncTask<String, Void, String>
+    {
+    	
+		@Override
+		protected String doInBackground(String... params) {
+			final boolean killMe = false;
+			final notifications notification = new notifications();
+			
+				final Runnable r = new Runnable()
+				{
+				    public void run() 
+				    {
+				    	//if (connectVerifyValue) {
+				    		ayudaServicios help = new ayudaServicios();
+					    	puntosDeAlerta = help.getPuntosAlerta();//
+					    	
+					    	//notificaciones
+					    	
+					    	notification.checkNotificationsNew(puntosDeAlerta);
+					    	double latitude = mGoogleMap.getMyLocation().getLatitude();
+		            		double longitude = mGoogleMap.getMyLocation().getLongitude();
+		            		
+					    	ArrayList<LatLng> list = notification.getNotificationNearToPoint(latitude,longitude);
+					    	
+					    	if (list != null && list.size()>0) {
+					    		for (int i = 0; i < list.size(); i++) {
+						    		markerOptions.position(list.get(i));
+									markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW));
+									mGoogleMap.addMarker(markerOptions);
+						    		Toast.makeText(getApplicationContext(), "notificaion text"+list.get(i).latitude, 1000).show();
+						    		handler.postDelayed(this, 3000);
+								}
+							}
+					    	
+						//}
+				    }
+				};
+
+				handler.postDelayed(r, 1000);
+			return null;
+	    }
+		
+	}
+    
     private class connectVerify extends AsyncTask<String, Void, String>
     {
     	private ProgressDialog Dialog;
     	boolean res=false;
+    	
+    	@Override
+        protected void onPreExecute() {
+    		Dialog = new ProgressDialog(MainActivity.this);
+            Dialog.setMessage("Verificando conexion a internet.");
+            Dialog.show();
+//    		new Handler().postDelayed(new Runnable() {
+//              @Override
+//              public void run() {
+//            	  Dialog.dismiss();
+//              }
+//          }, 3000);
+    		
+        }
+    	
 		@Override
 		protected String doInBackground(String... params) {
 	    	try{
@@ -277,6 +452,7 @@ public class MainActivity extends FragmentActivity
 	                if (urlc.getResponseCode() == 200)  //Successful response.
 	                {
 	                	res = true;
+	                	connectVerifyValue = true;
 	                } 
 	            }
 	        }
@@ -289,27 +465,38 @@ public class MainActivity extends FragmentActivity
 		@Override
         protected void onPostExecute(String result) {
 			if (res==false) {
-				Dialog = new ProgressDialog(MainActivity.this);
-                Dialog.setMessage("No se tiene conexion a Internet. ADIOS...");
+				
+				//Dialog = new ProgressDialog(MainActivity.this);
+                Dialog.setMessage("No se tiene conexion a Internet.");
                 Dialog.show();
-                
                 new Handler().postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                    	onStop();
-                    	finish();
+                    	Dialog.dismiss();
                     }
-                }, 5000);
+                }, 4000);
                 
 			}
 			else
 			{
-				Dialog = new ProgressDialog(MainActivity.this);
-                Dialog.setMessage("ok conexion");
+				try {
+					marcarPuntos();
+				} catch (JSONException e) {
+					e.printStackTrace();
+				}
+				//Dialog = new ProgressDialog(MainActivity.this);
+                Dialog.setMessage("Hola, conexion exitosa");
                 Dialog.show();
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                    	Dialog.dismiss();
+                    }
+                }, 3000);
 			}
 		}
     }
+    
     private class obtainRoute extends AsyncTask<String, Void, String>
     {
     	private ProgressDialog Dialog;
@@ -458,41 +645,14 @@ public class MainActivity extends FragmentActivity
     
     
     
-//    public void onClickAddPoint(View view) {
-//    	if(homeFalse == "false")
-//    	{
-//    		Toast.makeText(this,"Seleccione un punto para HOME", Toast.LENGTH_LONG).show();
-//    		homeFalse = "llenar";
-//    		hiloSecundarioMenu();
-//    	}
-//    	else
-//    	{
-//    		if (homeFalse == "oto") {
-//    			Toast.makeText(this,"camino a home", Toast.LENGTH_LONG).show();
-//    			//"hiloSecundarioMenu", "garcia"
-//    			double latitude = mGoogleMap.getMyLocation().getLatitude();
-//    			double longitude = mGoogleMap.getMyLocation().getLongitude();
-//    			LatLng Position = new LatLng(latitude, longitude);
-//    			fromPosition = Position;
-//    			toPosition = home;
-//    			
-//    			HelpRute help = new HelpRute();
-//	        	help.execute();
-//			}
-//    	}
-//	}
-    
-    
-    
-    
-    
-    
     
     // MENU ==============================================================
     
 
     public void toggleMenu(View v){
+    	
         mainLayout.toggleMenu();
+        
     }
     public void toggleMenuRight(View v){
         mainLayout.toggleMenu();
@@ -511,123 +671,224 @@ public class MainActivity extends FragmentActivity
     
     
     
-    
-    
-    
-    private void onMenuItemClick(AdapterView<?> parent, View view, int position, long id) throws JSONException {
-    	
-    	String selectedItem = lvMenuItems[position];
-        String currentItem = tvTitle.getText().toString();
-        
-        // Do nothing if selectedItem is currentItem
-        if(selectedItem.compareTo(currentItem) == 0) {
-            mainLayout.toggleMenu();
-            return;
-        }
+    private void onHomeClick( View view) throws JSONException {
+    	if (connectVerifyValue) {
+    		FragmentManager fm = MainActivity.this.getSupportFragmentManager();
+            FragmentTransaction ft = fm.beginTransaction();
+            Fragment fragment = null;
             
-        FragmentManager fm = MainActivity.this.getSupportFragmentManager();
-        FragmentTransaction ft = fm.beginTransaction();
-        Fragment fragment = null;
+            	JSONArray puntoCasaJson= null;
+            	try {
+            		ayudaServicios servicios = new ayudaServicios();
+            		puntoCasaJson = servicios.getPunto("Casa", codigo_usuario);
+    			} catch (Exception e) {
+    				Toast.makeText(this,"menu get punto casa", Toast.LENGTH_LONG).show();
+    				super.onStop();
+    		        //finish();
+    			}
+            	
+            	if(puntoCasaJson.length() == 0) 	
+            	{
+            		Toast.makeText(this,"Seleccione Punto a CASA", Toast.LENGTH_LONG).show();
+            		homeFalse = "llenar";
+            		hiloSecundarioMenu();
+            	}
+            	else 
+            	{
+            		Toast.makeText(this,"camino a CASA", Toast.LENGTH_LONG).show();
+            		double latitude = mGoogleMap.getMyLocation().getLatitude();
+            		double longitude = mGoogleMap.getMyLocation().getLongitude();
+            		LatLng Position = new LatLng(latitude, longitude);
+            		fromPosition = Position;
+            		
+            		double lat = puntoCasaJson.getJSONObject(0).getDouble("latitude");
+            		double lon = puntoCasaJson.getJSONObject(0).getDouble("longitude");
+            		
+            		toPosition = new LatLng(lat, lon);
+            		
+            		obtainRoute help = new obtainRoute();
+    	        	help.execute(ok);
 
-        
-        if(selectedItem.compareTo("Dirigirse a Casa") == 0) 
+        		}
+           
+    	}
+    	else
         {
-        	JSONArray puntoCasaJson= null;
-        	try {
-        		ayudaServicios servicios = new ayudaServicios();
-        		puntoCasaJson = servicios.getPunto("casa", codigo_usuario);
-			} catch (Exception e) {
-				Toast.makeText(this,"menu get punto casa", Toast.LENGTH_LONG).show();
-				super.onStop();
-		        //finish();
-			}
-        	
-        	if(puntoCasaJson.length() == 0) 	
-        	{
-        		Toast.makeText(this,"Seleccione Punto a CASA", Toast.LENGTH_LONG).show();
-        		homeFalse = "llenar";
-        		hiloSecundarioMenu();
-        	}
-        	else 
-        	{
-        		Toast.makeText(this,"camino a CASA", Toast.LENGTH_LONG).show();
-        		double latitude = mGoogleMap.getMyLocation().getLatitude();
-        		double longitude = mGoogleMap.getMyLocation().getLongitude();
-        		LatLng Position = new LatLng(latitude, longitude);
-        		fromPosition = Position;
-        		
-        		double lat = puntoCasaJson.getJSONObject(0).getDouble("latitude");
-        		double lon = puntoCasaJson.getJSONObject(0).getDouble("longitude");
-        		
-        		toPosition = new LatLng(lat, lon);
-        		
-        		obtainRoute help = new obtainRoute();
-	        	help.execute(ok);
-
-    		}
-        } 
-        else 
-        	if(selectedItem.compareTo("Dirigirse al Trabajo") == 0) 
-        	{
-        		JSONArray puntoTrabajoJson=null;
-        		try {
-        			ayudaServicios servicios = new ayudaServicios();
-            		puntoTrabajoJson = servicios.getPunto("trabajo", codigo_usuario);
-				} catch (Exception e) {
-					Toast.makeText(this,"menu get punto trabajo", Toast.LENGTH_LONG).show();
-					super.onStop();
-			      //  finish();
-				}
-        		
-			
-        		if(puntoTrabajoJson.length() == 0) 	
-        		{
-        		
-        			Toast.makeText(this,"Seleccione punto al TRABAJO", Toast.LENGTH_LONG).show();
-        			workFalse = "llenar";
-        			hiloSecundarioMenu();
-        		}
-        		else 
-        		{
-        			Toast.makeText(this,"camino al TRABAJO", Toast.LENGTH_LONG).show();
-        			double latitude = mGoogleMap.getMyLocation().getLatitude();
-        			double longitude = mGoogleMap.getMyLocation().getLongitude();
-        			LatLng Position = new LatLng(latitude, longitude);
-        			fromPosition = Position;
-        		
-        			double lat = puntoTrabajoJson.getJSONObject(0).getDouble("latitude");
-        			double lon = puntoTrabajoJson.getJSONObject(0).getDouble("longitude");
-        		
-        			toPosition = new LatLng(lat, lon);
-    				
-        			obtainRoute help = new obtainRoute();
-        			help.execute(ok);
-        		}
-        	}
-        	else 
-        		if(selectedItem.compareTo("Compartir punto de Bloqueo") == 0) 
-        		{
-        			try {
-        				ayudaServicios servicios = new ayudaServicios();
-            			puntosDeBloqueo = servicios.getPuntosBloqueoPersistente();
-            			Toast.makeText(this,"Seleccione punto de Bloque=", Toast.LENGTH_LONG).show();
-            			bloqueoFalse = "llenar";
-            			hiloSecundarioMenu();
-					} catch (Exception e) {
-						Toast.makeText(this,"menu compartir punto bloqueo", Toast.LENGTH_LONG).show();
-						super.onStop();
-				    //    finish();
-					}
-        		}
-        
-        	if(fragment != null) 
-        	{
-            	tvTitle.setText(selectedItem);
-        	}
-        
-        // Hide menu anyway
-        mainLayout.toggleMenu();
+        	Toast.makeText(this,"Necesita conexion a internet", Toast.LENGTH_SHORT).show();
+        }
     }
+    private void onWorkClick( View view) throws JSONException {
+    	if (connectVerifyValue) {
+    		FragmentManager fm = MainActivity.this.getSupportFragmentManager();
+            FragmentTransaction ft = fm.beginTransaction();
+            Fragment fragment = null;
+            
+    		JSONArray puntoTrabajoJson=null;
+    		try {
+    			ayudaServicios servicios = new ayudaServicios();
+        		puntoTrabajoJson = servicios.getPunto("Trabajo", codigo_usuario);
+			} catch (Exception e) {
+				Toast.makeText(this,"menu get punto trabajo", Toast.LENGTH_LONG).show();
+				super.onStop();
+		      //  finish();
+			}
+    		
+		
+    		if(puntoTrabajoJson.length() == 0) 	
+    		{
+    		
+    			Toast.makeText(this,"Seleccione punto al TRABAJO", Toast.LENGTH_LONG).show();
+    			workFalse = "llenar";
+    			hiloSecundarioMenu();
+    		}
+    		else 
+    		{
+    			Toast.makeText(this,"camino al TRABAJO", Toast.LENGTH_LONG).show();
+    			double latitude = mGoogleMap.getMyLocation().getLatitude();
+    			double longitude = mGoogleMap.getMyLocation().getLongitude();
+    			LatLng Position = new LatLng(latitude, longitude);
+    			fromPosition = Position;
+    		
+    			double lat = puntoTrabajoJson.getJSONObject(0).getDouble("latitude");
+    			double lon = puntoTrabajoJson.getJSONObject(0).getDouble("longitude");
+    		
+    			toPosition = new LatLng(lat, lon);
+				
+    			obtainRoute help = new obtainRoute();
+    			help.execute(ok);
+    		}
+           
+    	}
+    	else
+        {
+        	Toast.makeText(this,"Necesita conexion a internet", Toast.LENGTH_SHORT).show();
+        }
+    }
+    
+    private void onAccidentClick( View view) throws JSONException {
+    	if (connectVerifyValue) {
+    		FragmentManager fm = MainActivity.this.getSupportFragmentManager();
+            FragmentTransaction ft = fm.beginTransaction();
+            Fragment fragment = null;
+            
+    		try {
+				Toast.makeText(this,"Seleccione el punto del ACCIDENTE", Toast.LENGTH_LONG).show();
+				double latitude = mGoogleMap.getMyLocation().getLatitude();
+        		double longitude = mGoogleMap.getMyLocation().getLongitude();
+        		
+        		CameraPosition cameraPosition2 = new CameraPosition.Builder().target(new LatLng(latitude, longitude)).zoom(17).bearing(0).tilt(20).build();
+	            mGoogleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition2));
+	            hiloSecundarioMenuAlertaAccident();
+    		} catch (Exception e) {
+				Toast.makeText(this,"menu compartir punto bloqueo", Toast.LENGTH_LONG).show();
+				super.onStop();
+		    //    finish();
+			}
+           
+    	}
+    	else
+        {
+        	Toast.makeText(this,"Necesita conexion a internet", Toast.LENGTH_SHORT).show();
+        }
+    }
+    
+    private void onRaidClick( View view) throws JSONException {
+    	if (connectVerifyValue) {
+    		FragmentManager fm = MainActivity.this.getSupportFragmentManager();
+            FragmentTransaction ft = fm.beginTransaction();
+            Fragment fragment = null;
+            
+    		try {
+				Toast.makeText(this,"Seleccione el punto de REDADA", Toast.LENGTH_LONG).show();
+				double latitude = mGoogleMap.getMyLocation().getLatitude();
+        		double longitude = mGoogleMap.getMyLocation().getLongitude();
+        		
+        		CameraPosition cameraPosition2 = new CameraPosition.Builder().target(new LatLng(latitude, longitude)).zoom(17).bearing(0).tilt(20).build();
+	            mGoogleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition2));
+	            hiloSecundarioMenuAlertaRaid();
+    		} catch (Exception e) {
+				Toast.makeText(this,"menu compartir punto bloqueo", Toast.LENGTH_LONG).show();
+				super.onStop();
+		    //    finish();
+			}
+           
+    	}
+    	else
+        {
+        	Toast.makeText(this,"Necesita conexion a internet", Toast.LENGTH_SHORT).show();
+        }
+    }
+    
+    private void onMarketClick( View view) throws JSONException {
+    	if (connectVerifyValue) {
+    		FragmentManager fm = MainActivity.this.getSupportFragmentManager();
+            FragmentTransaction ft = fm.beginTransaction();
+            Fragment fragment = null;
+            
+    		try {
+				Toast.makeText(this,"Seleccione el punto de MERCADO", Toast.LENGTH_LONG).show();
+				hiloSecundarioMenuMarket();
+    		} catch (Exception e) {
+				Toast.makeText(this,"menu compartir punto bloqueo", Toast.LENGTH_LONG).show();
+				super.onStop();
+		    //    finish();
+			}
+           
+    	}
+    	else
+        {
+        	Toast.makeText(this,"Necesita conexion a internet", Toast.LENGTH_SHORT).show();
+        }
+    }
+    
+    private void onSchoolClick( View view) throws JSONException {
+    	if (connectVerifyValue) {
+    		FragmentManager fm = MainActivity.this.getSupportFragmentManager();
+            FragmentTransaction ft = fm.beginTransaction();
+            Fragment fragment = null;
+            
+    		try {
+				Toast.makeText(this,"Seleccione el punto de COLEGIO", Toast.LENGTH_LONG).show();
+				hiloSecundarioMenuSchool();
+    		} catch (Exception e) {
+				Toast.makeText(this,"menu compartir punto bloqueo", Toast.LENGTH_LONG).show();
+				super.onStop();
+		    }
+           
+    	}
+    	else
+        {
+        	Toast.makeText(this,"Necesita conexion a internet", Toast.LENGTH_SHORT).show();
+        }
+    }
+    private void onTrafficClick( View view) throws JSONException {
+    	if (connectVerifyValue) {
+    		FragmentManager fm = MainActivity.this.getSupportFragmentManager();
+            FragmentTransaction ft = fm.beginTransaction();
+            Fragment fragment = null;
+            
+    		try {
+				Toast.makeText(this,"Seleccione el punto de TRAFICO", Toast.LENGTH_LONG).show();
+				double latitude = mGoogleMap.getMyLocation().getLatitude();
+        		double longitude = mGoogleMap.getMyLocation().getLongitude();
+        		
+        		CameraPosition cameraPosition2 = new CameraPosition.Builder().target(new LatLng(latitude, longitude)).zoom(17).bearing(0).tilt(20).build();
+	            mGoogleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition2));
+    			hiloSecundarioMenuAlertaTraffic();
+    		} catch (Exception e) {
+				Toast.makeText(this,"menu compartir punto bloqueo", Toast.LENGTH_LONG).show();
+				super.onStop();
+		    //    finish();
+			}
+           
+    	}
+    	else
+        {
+        	Toast.makeText(this,"Necesita conexion a internet", Toast.LENGTH_SHORT).show();
+        }
+    }
+    
+    
     
 private void onMenuItemClickRight(AdapterView<?> parent, View view, int position, long id) throws JSONException {
     	
@@ -639,7 +900,9 @@ private void onMenuItemClickRight(AdapterView<?> parent, View view, int position
             mainLayout.toggleMenuRight();
             return;
         }
-            
+            if (connectVerifyValue) {
+				
+			
         FragmentManager fm = MainActivity.this.getSupportFragmentManager();
         FragmentTransaction ft = fm.beginTransaction();
         Fragment fragment = null;
@@ -660,6 +923,7 @@ private void onMenuItemClickRight(AdapterView<?> parent, View view, int position
             	options.position(Position);
             	options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
             	mGoogleMap.addMarker(options);
+            	marcarPuntos();
         	//put lisener para el segundo punto
         		methodChangeMode(view);
             	
@@ -679,6 +943,11 @@ private void onMenuItemClickRight(AdapterView<?> parent, View view, int position
         
         // Hide menu anyway
         mainLayout.toggleMenuRight();
+            }
+            else
+            {
+            	Toast.makeText(this,"Necesita conexion a internet", Toast.LENGTH_SHORT).show();
+            }
     }
 
     
@@ -708,7 +977,7 @@ private void onMenuItemClickRight(AdapterView<?> parent, View view, int position
     	try {
     		toggleButton1 = (ToggleButton)findViewById(R.id.toggleButton1);
     		if (toggleButton1.isChecked()) {
-        		mGoogleMap.setOnMapClickListener(new OnMapClickListener() 
+    			mGoogleMap.setOnMapClickListener(new OnMapClickListener() 
             	{
             	  
         			@Override
@@ -751,6 +1020,11 @@ private void onMenuItemClickRight(AdapterView<?> parent, View view, int position
         		        	help.execute();
         		        	punteroRuta = 0;
         		        	mGoogleMap.setOnMapClickListener(null);
+        		        	try {
+								marcarPuntos();
+							} catch (JSONException e) {
+								e.printStackTrace();
+							}
         		        	
         		        	//boton visible iniciar ruta
         		        	Button start_rute = (Button)findViewById(R.id._ini_ruta);
@@ -875,13 +1149,183 @@ private void onMenuItemClickRight(AdapterView<?> parent, View view, int position
 					System.out.println(e.getMessage());
 				}
     		}
- }	
-		
-    	
-    		 
+    	}	
+	}
     
+    public void hiloSecundarioMenuAlertaAccident()
+    {
+    	mGoogleMap.setOnMapClickListener(new OnMapClickListener(){
+			
+			@Override
+			public void onMapClick(LatLng point) 
+			{
+    				markerPoints.clear();
+					mGoogleMap.clear();
+					MarkerOptions options = new MarkerOptions();
+					options.position(point);
+					options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW));
+					mGoogleMap.addMarker(options);
+					
+					double latitude = mGoogleMap.getMyLocation().getLatitude();
+            		double longitude = mGoogleMap.getMyLocation().getLongitude();
+            		
+            		GMapV2GetRouteDirection auxiliary = new GMapV2GetRouteDirection();
+            		double distancia = auxiliary.CalculationByDistance(latitude, longitude, point.latitude, point.longitude);
+					if (distancia < 300) {
+						try {
+							ayudaServicios servicios = new ayudaServicios();
+							servicios.guardarPuntoAlerta("Accidente", codigo_usuario, point.latitude,point.longitude);
+							marcarPuntos();
+							
+						} catch (Exception e) {
+							System.out.println("hiloSecundarioMenu  home");
+							onStop();
+					        //finish();
+						}
+						mGoogleMap.setOnMapClickListener(null);
+					}
+					else
+					{
+						mGoogleMap.clear();
+						Toast.makeText(context,"Necesita estar cercano al ACCIDENTE", Toast.LENGTH_LONG).show();
+					}
+					
+			}
+		});
+    }
+    public void hiloSecundarioMenuAlertaRaid()
+    {
+    	mGoogleMap.setOnMapClickListener(new OnMapClickListener(){
+			
+			@Override
+			public void onMapClick(LatLng point) 
+			{
+    				markerPoints.clear();
+					mGoogleMap.clear();
+					MarkerOptions options = new MarkerOptions();
+					options.position(point);
+					options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW));
+					mGoogleMap.addMarker(options);
+					
+					double latitude = mGoogleMap.getMyLocation().getLatitude();
+            		double longitude = mGoogleMap.getMyLocation().getLongitude();
+            		
+            		GMapV2GetRouteDirection auxiliary = new GMapV2GetRouteDirection();
+            		double distancia = auxiliary.CalculationByDistance(latitude, longitude, point.latitude, point.longitude);
+					if (distancia < 300) {
+						try {
+							ayudaServicios servicios = new ayudaServicios();
+							servicios.guardarPuntoAlerta("Redada", codigo_usuario, point.latitude,point.longitude);
+							marcarPuntos();
+						} catch (Exception e) {
+							System.out.println("hiloSecundarioMenu  home");
+							onStop();
+					        //finish();
+						}
+						mGoogleMap.setOnMapClickListener(null);
+					}
+					else
+					{
+						mGoogleMap.clear();
+						Toast.makeText(context,"Necesita estar cercano a la REDADA", Toast.LENGTH_LONG).show();
+					}
+					
+			}
+		});
     }
     
+    public void hiloSecundarioMenuMarket()
+    {
+    	mGoogleMap.setOnMapClickListener(new OnMapClickListener(){
+			
+			@Override
+			public void onMapClick(LatLng point) 
+			{
+    				markerPoints.clear();
+					mGoogleMap.clear();
+					MarkerOptions options = new MarkerOptions();
+					options.position(point);
+					options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
+					mGoogleMap.addMarker(options);
+					
+						try {
+							ayudaServicios servicios = new ayudaServicios();
+							servicios.guardarPuntoBloqueo(codigo_usuario, point.latitude,point.longitude);
+							marcarPuntos();
+						} catch (Exception e) {
+							System.out.println("hiloSecundarioMenu  home");
+							onStop();
+					    }
+						mGoogleMap.setOnMapClickListener(null);
+			}
+		});
+    }
+    
+    public void hiloSecundarioMenuSchool()
+    {
+    	mGoogleMap.setOnMapClickListener(new OnMapClickListener(){
+			
+			@Override
+			public void onMapClick(LatLng point) 
+			{
+    				markerPoints.clear();
+					mGoogleMap.clear();
+					MarkerOptions options = new MarkerOptions();
+					options.position(point);
+					options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
+					mGoogleMap.addMarker(options);
+						try {
+							ayudaServicios servicios = new ayudaServicios();
+							servicios.guardarPuntoBloqueo(codigo_usuario, point.latitude,point.longitude);
+							marcarPuntos();
+						} catch (Exception e) {
+							System.out.println("hiloSecundarioMenu  home");
+							onStop();
+						}
+						mGoogleMap.setOnMapClickListener(null);
+			}
+		});
+    }
+    public void hiloSecundarioMenuAlertaTraffic()
+    {
+    	mGoogleMap.setOnMapClickListener(new OnMapClickListener(){
+			
+			@Override
+			public void onMapClick(LatLng point) 
+			{
+    				markerPoints.clear();
+					mGoogleMap.clear();
+					MarkerOptions options = new MarkerOptions();
+					options.position(point);
+					options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW));
+					mGoogleMap.addMarker(options);
+					
+					double latitude = mGoogleMap.getMyLocation().getLatitude();
+            		double longitude = mGoogleMap.getMyLocation().getLongitude();
+            		
+            		GMapV2GetRouteDirection auxiliary = new GMapV2GetRouteDirection();
+            		double distancia = auxiliary.CalculationByDistance(latitude, longitude, point.latitude, point.longitude);
+					if (distancia < 300) {
+						try {
+							ayudaServicios servicios = new ayudaServicios();
+							servicios.guardarPuntoAlerta("Trafico", codigo_usuario, point.latitude,point.longitude);
+							marcarPuntos();
+						} catch (Exception e) {
+							System.out.println("hiloSecundarioMenu  home");
+							onStop();
+					        //finish();
+						}
+						mGoogleMap.setOnMapClickListener(null);
+					}
+					else
+					{
+						mGoogleMap.clear();
+						Toast.makeText(context,"Necesita estar cercano al TRAFICO", Toast.LENGTH_LONG).show();
+					}
+					
+			}
+		});
+    }
     public void hiloSecundarioMenu()
     {
     	mGoogleMap.setOnMapClickListener(new OnMapClickListener(){
@@ -889,8 +1333,7 @@ private void onMenuItemClickRight(AdapterView<?> parent, View view, int position
 			@Override
 			public void onMapClick(LatLng point) 
 			{
-    	
-		    	if(homeFalse == "llenar")
+    	    	if(homeFalse == "llenar")
 				{
 					markerPoints.clear();
 					mGoogleMap.clear();
@@ -903,7 +1346,8 @@ private void onMenuItemClickRight(AdapterView<?> parent, View view, int position
 					
 					try {
 						ayudaServicios servicios = new ayudaServicios();
-						servicios.guardarPunto("casa", codigo_usuario, home.latitude,home.longitude);
+						servicios.guardarPunto("Casa", codigo_usuario, home.latitude,home.longitude);
+						marcarPuntos();
 					} catch (Exception e) {
 						System.out.println("hiloSecundarioMenu  home");
 						onStop();
@@ -925,45 +1369,64 @@ private void onMenuItemClickRight(AdapterView<?> parent, View view, int position
 					
 					try {
 						ayudaServicios servicios = new ayudaServicios();
-						servicios.guardarPunto("trabajo", codigo_usuario, work.latitude,work.longitude);
+						servicios.guardarPunto("Trabajo", codigo_usuario, work.latitude,work.longitude);
+						marcarPuntos();
 					} catch (Exception e) {
 						System.out.println("hiloSecundarioMenu  work");
 						onStop();
 						//finish();
 					}
-					
-					return;
-				}
-				if(bloqueoFalse == "llenar")
-				{
-					markerPoints.clear();
-					mGoogleMap.clear();
-					//bloqueo = point;
-					puntosDeBloqueo.add(point);
-					
-					for(int i=0 ; i<puntosDeBloqueo.size() ; i++)
-					{
-						markerOptions.position(puntosDeBloqueo.get(i));
-						markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
-						mGoogleMap.addMarker(markerOptions);
-					}
-					
-					bloqueoFalse = "false";
-					
-					try {
-						ayudaServicios servicios = new ayudaServicios();
-						servicios.guardarPuntoBloqueo(codigo_usuario, point.latitude,point.longitude);
-					} catch (Exception e) {
-						System.out.println("hiloSecundarioMenu  bloqueo");
-						onStop();
-						//finish();
-					}
-					
 					return;
 				}
 			}
+		});
+    }
+    //------------------------------PRIVATE REFACTORIZACION----------------------
+    
+    private void marcarPuntos() throws JSONException
+    {
+    	ayudaServicios aux = new ayudaServicios();
+		puntosDeAlerta = aux.getPuntosAlerta();
+		puntosDeBloqueo = aux.getPuntosBloqueoPersistente();
 		
-    	});
+		if (puntosDeAlerta!=null && puntosDeAlerta.size()>0) {
+			for(int i=0 ; i<puntosDeAlerta.size() ; i++)
+			{
+				markerOptions.position(puntosDeAlerta.get(i));
+				markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW));
+				mGoogleMap.addMarker(markerOptions);
+			}
+		}
+		if (puntosDeBloqueo!=null && puntosDeBloqueo.size()>0) {
+			for(int i=0 ; i<puntosDeBloqueo.size() ; i++)
+			{
+				markerOptions.position(puntosDeBloqueo.get(i));
+				markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
+				mGoogleMap.addMarker(markerOptions);
+			}
+		}
+		
+		JSONArray puntoCasaJson= aux.getPunto("Casa", codigo_usuario);
+		JSONArray puntoTrabajoJson= aux.getPunto("Trabajo", codigo_usuario);
+		if(puntoCasaJson!=null && puntoCasaJson.length() != 0) 	
+    	{
+			double lat = puntoCasaJson.getJSONObject(0).getDouble("latitude");
+    		double lon = puntoCasaJson.getJSONObject(0).getDouble("longitude");
+    		
+    		markerOptions.position(new LatLng(lat, lon));
+			markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE));
+			mGoogleMap.addMarker(markerOptions);
+    	}
+		if(puntoTrabajoJson!=null && puntoTrabajoJson.length() != 0) 	
+    	{
+			double lat = puntoTrabajoJson.getJSONObject(0).getDouble("latitude");
+    		double lon = puntoTrabajoJson.getJSONObject(0).getDouble("longitude");
+    		
+    		markerOptions.position(new LatLng(lat, lon));
+			markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_CYAN));
+			mGoogleMap.addMarker(markerOptions);
+    	}
+		
     }
     
 }

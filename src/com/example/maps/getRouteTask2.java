@@ -13,8 +13,8 @@ import com.google.android.gms.maps.model.PolylineOptions;
 
 public class getRouteTask2 {
 	private int distanceToThePointOnLockRoad = 60;
-	private int distanceToThePointOnLockPoint = 300;
-	private int distanceToMoveAwayThePointLock = 220;
+	private int distanceToThePointOnLockPoint = 200;
+	private int distanceToMoveAwayThePointLock = 200;
 	
 	
 	public getRouteTask2() {
@@ -31,7 +31,7 @@ public class getRouteTask2 {
 		ArrayList<LatLng> res = new ArrayList<LatLng>();
 		
 		//mapear los puntos de bloqueo
-		Map<LatLng,String> mapLockPoints = new LinkedHashMap<LatLng, String>();;
+		Map<LatLng,String> mapLockPoints = new LinkedHashMap<LatLng, String>();
 		for (int i = 0; i < puntosBloqueo.size(); i++) {
 			mapLockPoints.put(puntosBloqueo.get(i),"ok");
 		}

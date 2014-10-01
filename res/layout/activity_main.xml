@@ -1,39 +1,197 @@
 <com.entropy.slidingmenu2.layout.MainLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
+    android:layout_width="wrap_content"
     android:layout_height="match_parent"
     android:orientation="horizontal"
     android:textColor="#FFFFFF" >
-    
-     <!-- This holds our menu -->
+     
+     <!-- This holds our menuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu -->
 
      <LinearLayout
          xmlns:android="http://schemas.android.com/apk/res/android"
          android:layout_width="178dp"
          android:layout_height="match_parent"
          android:orientation="vertical" 
-         android:textColor="#FFFFFF">
-         
-		<TextView  
+         android:textColor="#FFFFFF"
+         android:background="#FFFFFF"
+         android:id="@+id/menu_options">
+        
+         <TextView  
 		    android:layout_width="fill_parent" 
-		    android:text="@string/sub_menu" 
+		    android:text="LUGARES FAVORITOS" 
 		    android:layout_height="wrap_content" 
 		    android:id="@+id/TextView01"/>
+         
+         <LinearLayout
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_below="@+id/fragment_main_textview10"
+	        android:layout_centerHorizontal="true"
+	        android:layout_marginTop="30dp"
+	        android:id="@+id/menu_options_1">
+
+        	<Button
+        	    android:layout_marginRight="10dp"
+        	    android:layout_marginLeft="10dp"
+        	    android:background="@drawable/ic_home"
+        	    android:id="@+id/button10"
+        	    android:layout_width="50dp"
+        	    android:layout_height="50dp"
+        	    android:layout_alignParentBottom="true"
+        	    android:layout_centerHorizontal="true"
+        	    android:onClick="onHomeClick"
+        	    android:layout_marginBottom="34dp"
+        	    android:text="" />
+
+        	<Button
+        	    android:layout_marginRight="10dp"
+        	    android:layout_marginLeft="10dp"
+        	    android:id="@+id/button11"
+        	    android:background="@drawable/ic_work"
+        	    android:layout_width="50dp"
+        	    android:layout_height="50dp"
+        	    android:layout_alignParentBottom="true"
+        	    android:layout_centerHorizontal="true"
+        	    android:layout_marginBottom="34dp"
+        	    android:text="" />
+
+        	<Button
+        	    android:layout_marginRight="10dp"
+        	    android:layout_marginLeft="10dp"
+        	    android:id="@+id/button12"
+        	    android:layout_width="wrap_content"
+        	    android:layout_height="wrap_content"
+        	    android:layout_alignParentBottom="true"
+        	    android:layout_centerHorizontal="true"
+        	    android:layout_marginBottom="34dp"
+        	    android:text="OTRO" />
+
+    	</LinearLayout>
+        
+       <!-- segundooooooooooooooooooooooooooooooooooooooo -->>
+       
+                <TextView  
+		    android:layout_width="fill_parent" 
+		    android:text="ENVIAR ALERTA" 
+		    android:layout_height="wrap_content" 
+		    android:id="@+id/TextView02"
+		    />
+         
+         <LinearLayout
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_below="@+id/fragment_main_textview11"
+	        android:layout_centerHorizontal="true"
+	        android:layout_marginTop="30dp"
+	        android:id="@+id/menu_options_2">
+
+        	<Button
+        	    android:background="@drawable/ic_accident"
+        	    android:layout_marginRight="10dp"
+        	    android:layout_marginLeft="10dp"
+        	    android:id="@+id/button13"
+        	    android:layout_width="50dp"
+        	    android:layout_height="50dp"
+        	    android:layout_alignParentBottom="true"
+        	    android:layout_centerHorizontal="true"
+        	    android:layout_marginBottom="34dp"
+        	    android:text="" />
+
+        	<Button
+        	    android:background="@drawable/ic_traffic"
+        	    android:layout_marginRight="10dp"
+        	    android:layout_marginLeft="10dp"
+        	    android:id="@+id/button14"
+        	    android:layout_width="50dp"
+        	    android:layout_height="50dp"
+        	    android:layout_alignParentBottom="true"
+        	    android:layout_centerHorizontal="true"
+        	    android:layout_marginBottom="34dp"
+        	    android:text="" />
+
+        	<Button
+        	    android:background="@drawable/ic_raid"
+        	    android:layout_marginRight="10dp"
+        	    android:layout_marginLeft="10dp"
+        	    android:id="@+id/button15"
+        	    android:layout_width="50dp"
+        	    android:layout_height="50dp"
+        	    android:layout_alignParentBottom="true"
+        	    android:layout_centerHorizontal="true"
+        	    android:layout_marginBottom="34dp"
+        	    android:text="" />
+
+    	</LinearLayout>
+    	<!-- terceroooooooooooooooooooooooooooooooooooooo -->
+    	
+    	         <TextView  
+		    android:layout_width="fill_parent" 
+		    android:text="PUNTOS DE BLOQUEO" 
+		    android:layout_height="wrap_content" 
+		    android:id="@+id/TextView03"/>
+         
+         <LinearLayout
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_below="@+id/fragment_main_textview12"
+	        android:layout_centerHorizontal="true"
+	        android:layout_marginTop="30dp" 
+	        android:id="@+id/menu_options_3">
+
+        	<Button
+        	    android:background="@drawable/ic_market"
+        	    android:layout_marginRight="10dp"
+        	    android:layout_marginLeft="10dp"
+        	    android:id="@+id/button16"
+        	    android:layout_width="50dp"
+        	    android:layout_height="50dp"
+        	    android:layout_alignParentBottom="true"
+        	    android:layout_centerHorizontal="true"
+        	    android:layout_marginBottom="34dp"
+        	    android:text="" />
+
+        	<Button
+        	    android:background="@drawable/ic_school"
+        	    android:layout_marginRight="10dp"
+        	    android:layout_marginLeft="10dp"
+        	    android:id="@+id/button17"
+        	    android:layout_width="50dp"
+        	    android:layout_height="50dp"
+        	    android:layout_alignParentBottom="true"
+        	    android:layout_centerHorizontal="true"
+        	    android:layout_marginBottom="34dp"
+        	    android:text="" />
+
+        	<Button
+        	    android:layout_marginRight="10dp"
+        	    android:layout_marginLeft="10dp"
+        	    android:id="@+id/button18"
+        	    android:layout_width="50dp"
+        	    android:layout_height="50dp"
+        	    android:layout_alignParentBottom="true"
+        	    android:layout_centerHorizontal="true"
+        	    android:layout_marginBottom="34dp"
+        	    android:text="OTRO" />
+
+    	</LinearLayout>  
+		
 		
         <ListView
             android:id="@+id/activity_main_menu_listview"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="#06646F"
+            android:background="#738E91"
             android:textColor="#FFFFFF"
-            android:cacheColorHint="#00000000" 
-            >
-            
+            android:cacheColorHint="#00000000"  >
+
         </ListView>
+                
+		 
     </LinearLayout>
     
-    <!-- This holds our content-->
+    <!-- This holds our content      ..........................-->
 
     <LinearLayout
+        
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -44,14 +202,14 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="#044951"
+            android:background="#000000"
             android:orientation="horizontal" >
 
             <Button
                 android:id="@+id/activity_main_content_button_menu"
                 android:layout_width="46dp"
                 android:layout_height="43dp"
-                android:background="@drawable/menu"
+                android:background="@drawable/icon_menu"
                 android:onClick="toggleMenu"
                 android:paddingBottom="4dp"
                 android:paddingLeft="4dp"
@@ -71,21 +229,25 @@
                 android:id="@+id/_ini_ruta"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_weight="0.94"
                 android:onClick="iniciar_recorrido"
                 android:text="Iniciar el Viaje"
                 android:visibility="invisible" />
 
             <ToggleButton
                 android:id="@+id/toggleButton1"
-                android:layout_width="wrap_content"
+                android:layout_width="55dp"
                 android:layout_height="match_parent"
+                android:layout_alignParentRight="true"
+                android:layout_weight="0.05"
+                android:background="@drawable/check"
                 android:checked="false"
                 android:gravity="right"
                 android:onClick="methodChangeMode"
-                android:text="ToggleButton"
+                android:text=""
                 android:textColorLink="@android:color/black"
-                android:textOff="Dibujar una Ruta"
-                android:textOn="Limpiar" />
+                android:textOff=" "
+                android:textOn=" " />
 
         </LinearLayout>
 
@@ -99,23 +261,5 @@
     </LinearLayout>
     
     <!-- This holds our menu right-->
-
-     <LinearLayout
-         xmlns:android="http://schemas.android.com/apk/res/android"
-         android:layout_width="178dp"
-         android:layout_height="match_parent"
-         android:orientation="vertical" 
-         android:textColor="#FFFFFF">
-
-        <ListView
-            android:id="@+id/activity_main_menu_listview_right"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="#06646F"
-            android:textColor="#FFFFFF"
-            android:cacheColorHint="#00000000" 
-            >
-        </ListView>
-    </LinearLayout>
 
 </com.entropy.slidingmenu2.layout.MainLayout>

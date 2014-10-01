@@ -4,6 +4,9 @@
     <string name="app_name">maps</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
-    <string name="sub_menu">PUNTOS FAVORITOS</string>
+    <string name="sub_menu">LUGARES FAVORITOS</string>
+    <string name="sub_menu2">REPORTAR PUNTO CONFLICTIVO</string>
+    <string name="sub_menu3">ALERTAS</string>
+    
 
 </resources>

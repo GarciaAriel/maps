@@ -29,14 +29,14 @@ import android.widget.Toast;
 
 @SuppressLint("NewApi")
 public class ayudaServicios {
-	String url = "http://192.168.100.229:8080/com.maps/sample/puntos";
+	String url = "http://192.168.100.147:8080/com.maps/sample/puntos";
 	
 	public JSONArray guardarPunto(String tipo,String usuario,double latitude, double longitude) {
 		
 		StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
 		StrictMode.setThreadPolicy(policy);
 		HttpClient httpclient = new DefaultHttpClient();
-		String complementoURL = url+"/setPunto/"+tipo+"/"+usuario+"/"+latitude+"/"+longitude;
+		String complementoURL = url+"/setPoint/"+tipo+"/"+usuario+"/"+latitude+"/"+longitude;
 		JSONArray jsonArray = null;
 		HttpGet httppost = new HttpGet(complementoURL);
 		try 
@@ -70,7 +70,7 @@ public class ayudaServicios {
 		StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
 		StrictMode.setThreadPolicy(policy);
 		HttpClient httpclient = new DefaultHttpClient();
-		String complementoURL = url+"/setPuntoBloqueo/"+codigo+"/"+latitude+"/"+longitude;
+		String complementoURL = url+"/setLockPoint/"+codigo+"/"+latitude+"/"+longitude;
 		JSONArray jsonArray = null;
 		HttpGet httppost = new HttpGet(complementoURL);
 		try 
@@ -97,12 +97,46 @@ public class ayudaServicios {
 		}
 		return jsonArray; 
 	}
+	
+public JSONArray guardarPuntoAlerta(String tipo,String codigo,double latitude, double longitude) {
+		
+		StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+		StrictMode.setThreadPolicy(policy);
+		HttpClient httpclient = new DefaultHttpClient();
+		String complementoURL = url+"/setAlertPoint/"+tipo+"/"+codigo+"/"+latitude+"/"+longitude;
+		JSONArray jsonArray = null;
+		HttpGet httppost = new HttpGet(complementoURL);
+		try 
+		{
+			HttpResponse response = httpclient.execute(httppost);
+			String jsonResult = inputStreamToString(
+					response.getEntity().getContent()).toString();
+
+			jsonArray = new JSONArray(jsonResult);
+			return jsonArray;
+		} 
+		catch (ClientProtocolException e) 
+		{
+			e.printStackTrace();
+		} 
+		catch (IOException e) 
+		{
+			e.printStackTrace();
+		} 
+		catch (JSONException e) 
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return jsonArray; 
+	}
+	
 	public JSONArray getPunto(String tipo,String usuario) {
 		
 		StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
 		StrictMode.setThreadPolicy(policy);
 		HttpClient httpclient = new DefaultHttpClient();
-		String complementoURL = url+"/getPunto/"+tipo+"/"+usuario;
+		String complementoURL = url+"/getPoint/"+tipo+"/"+usuario;
 		JSONArray jsonArray = null;
 		HttpGet httppost = new HttpGet(complementoURL);
 		try 
@@ -134,7 +168,7 @@ public ArrayList<LatLng> getPuntosBloqueoPersistente() {
 		StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
 		StrictMode.setThreadPolicy(policy);
 		HttpClient httpclient = new DefaultHttpClient();
-		String complementoURL = url+"/getPuntosBloqueoPersistente";
+		String complementoURL = url+"/getPersistentLockPoints";
 		JSONArray jsonArray = null;
 		HttpGet httppost = new HttpGet(complementoURL);
 		
@@ -174,6 +208,48 @@ public ArrayList<LatLng> getPuntosBloqueoPersistente() {
 		
 		return null; 
 	}
+public ArrayList<LatLng> getPuntosAlerta() {
+	
+	StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+	StrictMode.setThreadPolicy(policy);
+	HttpClient httpclient = new DefaultHttpClient();
+	String complementoURL = url+"/getAlertLockPoints";
+	JSONArray jsonArray = null;
+	HttpGet httppost = new HttpGet(complementoURL);
+	
+	ArrayList<LatLng> result = new ArrayList<LatLng>();
+	try 
+	{
+		HttpResponse response = httpclient.execute(httppost);
+		String jsonResult = inputStreamToString(
+				response.getEntity().getContent()).toString();
+
+		jsonArray = new JSONArray(jsonResult);
+		for(int i = 0 ; i<jsonArray.length() ; i++)
+		{
+			 JSONObject json_data = jsonArray.getJSONObject(i);
+			 double lat = json_data.getDouble("latitude");
+			 double lon = json_data.getDouble("longitude");
+			 LatLng punto = new LatLng(lat, lon);
+			 result.add(punto);
+		}
+		return result;
+	} 
+	catch (ClientProtocolException e) 
+	{
+		e.printStackTrace();
+	} 
+	catch (IOException e) 
+	{
+		e.printStackTrace();
+	} 
+	catch (JSONException e) 
+	{
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
+	return null; 
+}
 	private StringBuilder inputStreamToString(InputStream is) {
 		String rLine = "";
 		StringBuilder answer = new StringBuilder();
