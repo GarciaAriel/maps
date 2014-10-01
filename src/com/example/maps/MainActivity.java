@@ -360,8 +360,7 @@ public class MainActivity extends FragmentActivity
           se.execute();
           
           
-          checkNotifications ceh = new checkNotifications();
-          ceh.execute();
+          
           
           
 		  
@@ -412,6 +411,7 @@ public class MainActivity extends FragmentActivity
 				handler.postDelayed(r, 1000);
 			return null;
 	    }
+		
 		
 	}
     
@@ -485,6 +485,8 @@ public class MainActivity extends FragmentActivity
 					e.printStackTrace();
 				}
 				//Dialog = new ProgressDialog(MainActivity.this);
+				checkNotifications ceh = new checkNotifications();
+		        ceh.execute();
                 Dialog.setMessage("Hola, conexion exitosa");
                 Dialog.show();
                 new Handler().postDelayed(new Runnable() {
@@ -547,12 +549,8 @@ public class MainActivity extends FragmentActivity
 			//puntos bloqueo
 			try {
 				markerOptions = new MarkerOptions();
-				for(int i=0 ; i<puntosDeBloqueo.size() ; i++)
-				{
-					markerOptions.position(puntosDeBloqueo.get(i));
-					markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
-					mGoogleMap.addMarker(markerOptions);
-				}
+				marcarPuntos();
+				
 //				for(int i=0 ; i<puntosDeLaRuta.size() ; i++)
 //				{
 //					markerOptions.position(puntosDeLaRuta.get(i));
@@ -1036,6 +1034,7 @@ private void onMenuItemClickRight(AdapterView<?> parent, View view, int position
         		});
     		}
         	else{
+        		
         		markerPoints.clear();
         		puntosDeLaRuta.clear();
         		mGoogleMap.clear();
@@ -1051,12 +1050,13 @@ private void onMenuItemClickRight(AdapterView<?> parent, View view, int position
 
 	          	  //ayudaServicios help = new ayudaServicios();
 	                //puntosDeBloqueo = help.getPuntosBloqueoPersistente();
-	                for(int i=0 ; i<puntosDeBloqueo.size() ; i++)
-	  	  			{
-	  	  				markerOptions.position(puntosDeBloqueo.get(i));
-	  	  				markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
-	  	  				mGoogleMap.addMarker(markerOptions);
-	  	  			}
+	        	marcarPuntos();
+//	                for(int i=0 ; i<puntosDeBloqueo.size() ; i++)
+//	  	  			{
+//	  	  				markerOptions.position(puntosDeBloqueo.get(i));
+//	  	  				markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
+//	  	  				mGoogleMap.addMarker(markerOptions);
+//	  	  			}
 
         	}
 		} catch (Exception e) {
