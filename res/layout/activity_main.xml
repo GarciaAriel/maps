@@ -53,18 +53,6 @@
         	    android:layout_centerHorizontal="true"
         	    android:layout_marginBottom="34dp"
         	    android:text="" />
-
-        	<Button
-        	    android:layout_marginRight="10dp"
-        	    android:layout_marginLeft="10dp"
-        	    android:id="@+id/button12"
-        	    android:layout_width="wrap_content"
-        	    android:layout_height="wrap_content"
-        	    android:layout_alignParentBottom="true"
-        	    android:layout_centerHorizontal="true"
-        	    android:layout_marginBottom="34dp"
-        	    android:text="OTRO" />
-
     	</LinearLayout>
         
        <!-- segundooooooooooooooooooooooooooooooooooooooo -->>
@@ -161,29 +149,52 @@
         	    android:layout_marginBottom="34dp"
         	    android:text="" />
 
+        	
+
+    	</LinearLayout>  
+		
+		<!-- OTRO MENUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUU -->>
+                
+        <TextView  
+		    android:layout_width="fill_parent" 
+		    android:text="OPCIONES DE DIBUJO DE UNA RUTA" 
+		    android:layout_height="wrap_content" 
+		    android:id="@+id/TextView10"/>
+         
+         <LinearLayout
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_below="@+id/fragment_main_textview10"
+	        android:layout_centerHorizontal="true"
+	        android:layout_marginTop="30dp"
+	        android:id="@+id/menu_options_10">
+
         	<Button
         	    android:layout_marginRight="10dp"
         	    android:layout_marginLeft="10dp"
-        	    android:id="@+id/button18"
+        	    android:background="@drawable/ic_home"
+        	    android:id="@+id/button31"
+        	    android:layout_width="50dp"
+        	    android:layout_height="50dp"
+        	    android:layout_alignParentBottom="true"
+        	    android:layout_centerHorizontal="true"
+        	    android:onClick="onHomeClick"
+        	    android:layout_marginBottom="34dp"
+        	    android:text="" />
+
+        	<Button
+        	    android:layout_marginRight="10dp"
+        	    android:layout_marginLeft="10dp"
+        	    android:id="@+id/button32"
+        	    android:background="@drawable/ic_work"
         	    android:layout_width="50dp"
         	    android:layout_height="50dp"
         	    android:layout_alignParentBottom="true"
         	    android:layout_centerHorizontal="true"
         	    android:layout_marginBottom="34dp"
-        	    android:text="OTRO" />
+        	    android:text="" />
 
-    	</LinearLayout>  
-		
-		
-        <ListView
-            android:id="@+id/activity_main_menu_listview"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="#738E91"
-            android:textColor="#FFFFFF"
-            android:cacheColorHint="#00000000"  >
-
-        </ListView>
+    	</LinearLayout>
                 
 		 
     </LinearLayout>
@@ -202,14 +213,14 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="#000000"
+            android:background="#FFFFFF"
             android:orientation="horizontal" >
 
             <Button
                 android:id="@+id/activity_main_content_button_menu"
                 android:layout_width="46dp"
                 android:layout_height="43dp"
-                android:background="@drawable/icon_menu"
+                android:background="@drawable/ic_menu"
                 android:onClick="toggleMenu"
                 android:paddingBottom="4dp"
                 android:paddingLeft="4dp"
