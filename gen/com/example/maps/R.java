@@ -1495,11 +1495,18 @@ containing a value of this type.
         public static final int icon_new=0x7f020080;
         public static final int marker_blue_home=0x7f020081;
         public static final int marker_blue_work=0x7f020082;
-        public static final int marker_red_market=0x7f020083;
-        public static final int marker_red_school=0x7f020084;
-        public static final int marker_yellow_accidente=0x7f020085;
-        public static final int marker_yellow_policia=0x7f020086;
-        public static final int marker_yellow_trafico=0x7f020087;
+        public static final int marker_end=0x7f020083;
+        public static final int marker_red_market=0x7f020084;
+        public static final int marker_red_school=0x7f020085;
+        public static final int marker_rosado_market=0x7f020086;
+        public static final int marker_rosado_school=0x7f020087;
+        public static final int marker_start=0x7f020088;
+        public static final int marker_yellow_accidente=0x7f020089;
+        public static final int marker_yellow_accidente_alert=0x7f02008a;
+        public static final int marker_yellow_policia=0x7f02008b;
+        public static final int marker_yellow_policia_alert=0x7f02008c;
+        public static final int marker_yellow_trafico=0x7f02008d;
+        public static final int marker_yellow_trafico_alert=0x7f02008e;
     }
     public static final class id {
         public static final int TextView01=0x7f050051;

@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.concurrent.TimeoutException;
 
 import org.apache.http.HttpResponse;
@@ -65,12 +67,12 @@ public class ayudaServicios {
 	}
 	
 	
-	public JSONArray guardarPuntoBloqueo(String codigo,double latitude, double longitude) {
+	public JSONArray guardarPuntoBloqueo(String tipo,String codigo,double latitude, double longitude) {
 		
 		StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
 		StrictMode.setThreadPolicy(policy);
 		HttpClient httpclient = new DefaultHttpClient();
-		String complementoURL = url+"/setLockPoint/"+codigo+"/"+latitude+"/"+longitude;
+		String complementoURL = url+"/setLockPoint/"+tipo+"/"+codigo+"/"+latitude+"/"+longitude;
 		JSONArray jsonArray = null;
 		HttpGet httppost = new HttpGet(complementoURL);
 		try 
@@ -163,7 +165,8 @@ public JSONArray guardarPuntoAlerta(String tipo,String codigo,double latitude, d
 		}
 		return jsonArray; 
 	}
-public ArrayList<LatLng> getPuntosBloqueoPersistente() {
+	//private static Map<String, puntosGeoDatosUsuario> mapPuntosGeoDatosUsuario = new LinkedHashMap<String, puntosGeoDatosUsuario>();
+public Map<LatLng, String> getPuntosBloqueoPersistente() {
 		
 		StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
 		StrictMode.setThreadPolicy(policy);
@@ -172,7 +175,7 @@ public ArrayList<LatLng> getPuntosBloqueoPersistente() {
 		JSONArray jsonArray = null;
 		HttpGet httppost = new HttpGet(complementoURL);
 		
-		ArrayList<LatLng> result = new ArrayList<LatLng>();
+		Map<LatLng, String> result = new LinkedHashMap<LatLng, String>();
 		try 
 		{
 			HttpResponse response = httpclient.execute(httppost);
@@ -185,8 +188,10 @@ public ArrayList<LatLng> getPuntosBloqueoPersistente() {
 				 JSONObject json_data = jsonArray.getJSONObject(i);
 				 double lat = json_data.getDouble("latitude");
 				 double lon = json_data.getDouble("longitude");
+				 String tip = json_data.getString("tipo");
 				 LatLng punto = new LatLng(lat, lon);
-				 result.add(punto);
+				 
+				 result.put(punto, tip);
 			}
 			return result;
 		} 
@@ -208,16 +213,16 @@ public ArrayList<LatLng> getPuntosBloqueoPersistente() {
 		
 		return null; 
 	}
-public ArrayList<LatLng> getPuntosAlerta() {
+public Map<LatLng, String> getPuntosPosiblesBloqueoPersistente() {
 	
 	StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
 	StrictMode.setThreadPolicy(policy);
 	HttpClient httpclient = new DefaultHttpClient();
-	String complementoURL = url+"/getAlertLockPoints";
+	String complementoURL = url+"/getPersistentPossiblePoints";
 	JSONArray jsonArray = null;
 	HttpGet httppost = new HttpGet(complementoURL);
 	
-	ArrayList<LatLng> result = new ArrayList<LatLng>();
+	Map<LatLng, String> result = new LinkedHashMap<LatLng, String>();
 	try 
 	{
 		HttpResponse response = httpclient.execute(httppost);
@@ -230,8 +235,57 @@ public ArrayList<LatLng> getPuntosAlerta() {
 			 JSONObject json_data = jsonArray.getJSONObject(i);
 			 double lat = json_data.getDouble("latitude");
 			 double lon = json_data.getDouble("longitude");
+			 String tip = json_data.getString("tipo");
 			 LatLng punto = new LatLng(lat, lon);
-			 result.add(punto);
+			 
+			 result.put(punto, tip);
+		}
+		return result;
+	} 
+	catch (ClientProtocolException e) 
+	{
+		e.printStackTrace();
+	} 
+	catch (IOException e) 
+	{
+		e.printStackTrace();
+	} 
+	catch (JSONException e) 
+	{
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
+	
+	
+	
+	return null; 
+}
+public Map<LatLng, String> getPuntosAlerta() {
+	
+	StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+	StrictMode.setThreadPolicy(policy);
+	HttpClient httpclient = new DefaultHttpClient();
+	String complementoURL = url+"/getAlertLockPoints";
+	JSONArray jsonArray = null;
+	HttpGet httppost = new HttpGet(complementoURL);
+	
+	Map<LatLng, String> result = new LinkedHashMap<LatLng, String>();
+	try 
+	{
+		HttpResponse response = httpclient.execute(httppost);
+		String jsonResult = inputStreamToString(
+				response.getEntity().getContent()).toString();
+
+		jsonArray = new JSONArray(jsonResult);
+		for(int i = 0 ; i<jsonArray.length() ; i++)
+		{
+			 JSONObject json_data = jsonArray.getJSONObject(i);
+			 double lat = json_data.getDouble("latitude");
+			 double lon = json_data.getDouble("longitude");
+			 String tip = json_data.getString("tipo");
+			 LatLng punto = new LatLng(lat, lon);
+			 
+			 result.put(punto, tip);
 		}
 		return result;
 	} 

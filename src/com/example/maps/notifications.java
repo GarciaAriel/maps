@@ -9,8 +9,8 @@ import android.database.CursorJoiner.Result;
 import com.google.android.gms.maps.model.LatLng;
 
 public class notifications {
-	Map<LatLng,String> mapLockPoints = new LinkedHashMap<LatLng, String>();
-	private double distanceToThePoint= 500; 
+	Map<LatLng,String> mapLockPoints = null;
+	private double distanceToThePoint= 700; 
 	
 	public notifications(ArrayList<LatLng> puntos) {
 		for (int i = 0; i < puntos.size(); i++) {
@@ -21,42 +21,43 @@ public class notifications {
 		
 	}
 	
-	public void checkNotificationsNew(ArrayList<LatLng> puntos)
+	public void checkNotificationsNew(Map<LatLng, String> puntos)
 	{
 		if (puntos != null && puntos.size()>0) {
-			for (int i = 0; i < puntos.size(); i++) {
-				boolean auxiliary=true;
-				for (Map.Entry<LatLng, String> entry : mapLockPoints.entrySet()) {
-					if (puntos.get(i).equals(entry.getKey())) 
-					{
-						auxiliary = false;
-						break;
-					}
-				}
-				if (auxiliary) {
-					mapLockPoints.put(puntos.get(i),"no");//add new point
-				}
-			}
+			mapLockPoints =  new LinkedHashMap<LatLng, String>();
+			mapLockPoints = puntos;
+//			for (Map.Entry<LatLng, String> ent : puntos.entrySet()) {
+//				boolean auxiliary=true;
+//				for (Map.Entry<LatLng, String> entry : mapLockPoints.entrySet()) {
+//					if (ent.getKey().equals(entry.getKey())) 
+//					{
+//						auxiliary = false;
+//						break;
+//					}
+//				}
+//				if (auxiliary) {
+//					mapLockPoints.put(ent.getKey(),"no");//add new point
+//				}
+//			}
 		}
 	}
 	
-	public ArrayList<LatLng> getNotificationNearToPoint(double latCurrent,double lonCurrent)
+	public Map<LatLng, String> getNotificationNearToPoint(double latCurrent,double lonCurrent)
 	{
-		ArrayList<LatLng> result = new ArrayList<LatLng>();;
-		if(mapLockPoints != null )
+		Map<LatLng, String> result = new LinkedHashMap<LatLng, String>();
+		if(mapLockPoints != null && mapLockPoints.size()>0)
 		{
 			for (Map.Entry<LatLng, String> entry : mapLockPoints.entrySet()) {
-				if (entry.getValue() == "no") {
+				//if (entry.getValue() == "no") {
 					LatLng auxiliary = entry.getKey(); 
 	  				double lat = auxiliary.latitude;
 	  				double lon = auxiliary.longitude;
 	  				double distancia = Distance(lat,lon,latCurrent,lonCurrent);
 	  				
 	        		if (distancia < distanceToThePoint){
-	        			entry.setValue("si");
-	        			result.add(auxiliary);
+	        			result.put(entry.getKey(),entry.getValue() );
 	        		}
-				}
+				//}
 			}
 		}
 		return result;

@@ -1,9 +1,14 @@
 package com.example.maps;
 
+import java.lang.reflect.Array;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Stack;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.Executors;
@@ -20,6 +25,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -90,8 +96,12 @@ public class MainActivity extends FragmentActivity
     LatLng work;
     String workFalse= "false";
     //LatLng bloqueo;
-    ArrayList<LatLng> puntosDeBloqueo = new ArrayList<LatLng>();
-    ArrayList<LatLng> puntosDeAlerta = new ArrayList<LatLng>();
+    Map<LatLng, String> puntosDeBloqueo = new LinkedHashMap<LatLng, String>();
+    Map<LatLng, String> puntosDeBloqueoPosibles = new LinkedHashMap<LatLng, String>();
+    Map<LatLng, String> puntosDeAlerta = new LinkedHashMap<LatLng, String>();
+    Map<LatLng, String> puntosDeAlertaCercanos = new LinkedHashMap<LatLng, String>();
+    //ArrayList<LatLng> puntosDeBloqueo = new ArrayList<LatLng>();
+    //ArrayList<LatLng> puntosDeAlerta = new ArrayList<LatLng>();
     String bloqueoFalse= "false";
     String ok = "0";
     PolylineOptions rectLine = new PolylineOptions().width(10).color(Color.GREEN);
@@ -106,6 +116,11 @@ public class MainActivity extends FragmentActivity
     ToggleButton toggleButton1;
     final Context context = this;
     final Handler handler=new Handler();
+    HashMap<String ,Marker> mapp = new HashMap<String ,Marker> ();
+    final notifications notification = new notifications();
+	
+   // Stack < Marker > pila = new Stack < Marker > ();
+    //final ArrayList<Marker> markersAlert = new ArrayList<Marker>();
     
     //borrar
     int punteroRuta;
@@ -146,9 +161,12 @@ public class MainActivity extends FragmentActivity
             @Override
             public void onClick(View v) {
             	toggleButton1 = (ToggleButton) findViewById(R.id.toggleButton1);
-            	if (toggleButton1.isChecked()) {
-					toggleButton1.setChecked(false);
-				}
+            	
+//            	if (toggleButton1.isChecked()) {
+//					toggleButton1.setChecked(false);
+//				}
+            	
+            	
             	
             	//ocultar otro menu //mostrar otro
             	LinearLayout linear3 = (LinearLayout) findViewById(R.id.menu_options_10);
@@ -380,8 +398,14 @@ public class MainActivity extends FragmentActivity
           mGoogleMap.getUiSettings().setMyLocationButtonEnabled(true);
           mGoogleMap.getUiSettings().setAllGesturesEnabled(true);
           mGoogleMap.setTrafficEnabled(true);
+          mGoogleMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
           mGoogleMap.animateCamera(CameraUpdateFactory.zoomTo(12));
           markerOptions = new MarkerOptions();
+          
+//          marker = mGoogleMap.addMarker(new MarkerOptions()
+//      	.position(new LatLng(-17.393827, -66.156991))
+//      	.title("San Francisco")
+//      	.snippet("Population: 776733"));
           
           //provando la conexion servicios
           
@@ -398,46 +422,51 @@ public class MainActivity extends FragmentActivity
     private class checkNotifications extends AsyncTask<String, Void, String>
     {
     	private ProgressDialog Dialog;
-    	@Override
-    	protected void onPreExecute() {
-    		Dialog = new ProgressDialog(MainActivity.this);
-            Dialog.setMessage("una mierda no llega");
-            Dialog.show();
-        }
+//    	@Override
+//    	protected void onPreExecute() {
+//    		Dialog = new ProgressDialog(MainActivity.this);
+//            Dialog.setMessage("una mierda no llega");
+//            Dialog.show();
+//        }
     	
 		@Override
 		protected String doInBackground(String... params) {
 			
-			
-			final notifications notification = new notifications();
-			
-				final Runnable r = new Runnable()
+			final Runnable r = new Runnable()
 				{
 				    public void run() 
 				    {
 				    		ayudaServicios help = new ayudaServicios();
 					    	puntosDeAlerta = help.getPuntosAlerta();//
+					    	puntosDeBloqueo = help.getPuntosBloqueoPersistente();
+					    	puntosDeBloqueoPosibles = help.getPuntosPosiblesBloqueoPersistente();
+					    	llenarPuntosFavoritos();
+					    	
 					    	try {
-								marcarPuntos();
+								marcarPuntosAlerta();
+								marcarPuntosBloqueo();
+								marcarPuntosFavoritos();
+								marcarPuntosPosibesBloqueo();
+								marcarPuntosDeRuta();
 							} catch (JSONException e) {
 								e.printStackTrace();
 							}
 					    	//notificaciones
 					    	
-					    	notification.checkNotificationsNew(puntosDeAlerta);
-					    	double latitude = mGoogleMap.getMyLocation().getLatitude();
-		            		double longitude = mGoogleMap.getMyLocation().getLongitude();
-		            		
-					    	ArrayList<LatLng> list = notification.getNotificationNearToPoint(latitude,longitude);
-					    	
-					    	
-					    	if (list != null && list.size()>0) {
-					    		for (int i = 0; i < list.size(); i++) {
-						    		markerOptions.position(list.get(i));
-									markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW));
-									mGoogleMap.addMarker(markerOptions);
-						    	}
-							}
+//					    	notification.checkNotificationsNew(getPointsMap(puntosDeAlerta));
+//					    	double latitude = mGoogleMap.getMyLocation().getLatitude();
+//		            		double longitude = mGoogleMap.getMyLocation().getLongitude();
+//		            		
+//					    	ArrayList<LatLng> list = notification.getNotificationNearToPoint(latitude,longitude);
+//					    	
+//					    	
+//					    	if (list != null && list.size()>0) {
+//					    		for (int i = 0; i < list.size(); i++) {
+//						    		markerOptions.position(list.get(i));
+//									markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW));
+//									mGoogleMap.addMarker(markerOptions);
+//						    	}
+//							}
 					    	handler.postDelayed(this, 10000);
 					}
 				};
@@ -509,6 +538,13 @@ public class MainActivity extends FragmentActivity
                 try {
                 	checkNotifications ceh = new checkNotifications();
         	        ceh.execute();
+        	        
+        	        
+        	        marcarPuntosAlerta();
+        	        marcarPuntosBloqueo();
+        	        marcarPuntosFavoritos();
+        	        marcarPuntosPosibesBloqueo();
+        	        
 				} catch (Exception e) {
 					e.getMessage();
 				}
@@ -530,13 +566,13 @@ public class MainActivity extends FragmentActivity
         @Override
         protected void onPreExecute() {
         	try {
-        		mGoogleMap.clear();
+        		//mGoogleMap.clear();
           	  	rectLine = new PolylineOptions().width(10).color(Color.GREEN);
                 Dialog = new ProgressDialog(MainActivity.this);
                 Dialog.setMessage("Espere un momento");
                 Dialog.show();
-                ayudaServicios help = new ayudaServicios();
-    			puntosDeBloqueo = help.getPuntosBloqueoPersistente();
+                //ayudaServicios help = new ayudaServicios();
+    			//puntosDeBloqueo = help.getPuntosBloqueoPersistente();
 			} catch (Exception e) {
 				Dialog = new ProgressDialog(MainActivity.this);
                 Dialog.setMessage("en pre execute");
@@ -552,12 +588,12 @@ public class MainActivity extends FragmentActivity
 				getRouteTask2 getRoute = new getRouteTask2();
 				ArrayList<LatLng> listPoint;
 				
-				listPoint = getRoute.get_route(fromPosition,toPosition,puntosDeBloqueo);
-				puntosDeLaRuta = listPoint;
-				if(listPoint!=null)
+				puntosDeLaRuta = getRoute.get_route(fromPosition,toPosition,getPointsMap(puntosDeBloqueo));
+				
+				if(puntosDeLaRuta!=null)
 				{
-					for (int i = 0; i < listPoint.size(); i++) {
-						rectLine.add(listPoint.get(i));
+					for (int i = 0; i < puntosDeLaRuta.size(); i++) {
+						rectLine.add(puntosDeLaRuta.get(i));
 					}
 				}
 			} catch (Exception e) {
@@ -573,7 +609,6 @@ public class MainActivity extends FragmentActivity
 			//puntos bloqueo
 			try {
 				markerOptions = new MarkerOptions();
-				marcarPuntos();
 				
 //				for(int i=0 ; i<puntosDeLaRuta.size() ; i++)
 //				{
@@ -582,11 +617,11 @@ public class MainActivity extends FragmentActivity
 //					mGoogleMap.addMarker(markerOptions);
 //				}
 				markerOptions.position(fromPosition);
-				markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+				markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_start));
 				mGoogleMap.addMarker(markerOptions);
 				
 				markerOptions.position(toPosition);
-				markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
+				markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_end));
 				mGoogleMap.addMarker(markerOptions);
 				
 				mGoogleMap.addPolyline(rectLine);
@@ -618,7 +653,14 @@ public class MainActivity extends FragmentActivity
       super.onRestart();  // Always call the superclass method first
       // Activity being restarted from stopped state    
   }
-  
+  private ArrayList<LatLng> getPointsMap(Map<LatLng, String> puntos)
+  {
+	  ArrayList<LatLng> result = new ArrayList<LatLng>();
+	  for (Map.Entry<LatLng, String> entry : puntosDeBloqueo.entrySet()) {
+		  result.add(entry.getKey());
+	  }
+	  return result;
+  }
   
   
   
@@ -927,9 +969,10 @@ public class MainActivity extends FragmentActivity
             	//marker
             		MarkerOptions options = new MarkerOptions();
                 	options.position(Position);
-                	options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+                	options.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_start));
+                	//options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
                 	mGoogleMap.addMarker(options);
-                	marcarPuntos();
+                	//marcarPuntos();
             	//put lisener para el segundo punto
             		methodChangeMode(view);
         }
@@ -955,65 +998,65 @@ public class MainActivity extends FragmentActivity
     }
     
     
-private void onMenuItemClickRight(AdapterView<?> parent, View view, int position, long id) throws JSONException {
-    	
-    	String selectedItem = lvMenuItemsRight[position];
-        String currentItem = tvTitle.getText().toString();
-        
-        // Do nothing if selectedItem is currentItem
-        if(selectedItem.compareTo(currentItem) == 0) {
-            mainLayout.toggleMenuRight();
-            return;
-        }
-            if (connectVerifyValue) {
-				
-			
-        FragmentManager fm = MainActivity.this.getSupportFragmentManager();
-        FragmentTransaction ft = fm.beginTransaction();
-        Fragment fragment = null;
-
-        
-        if(selectedItem.compareTo("Tomar mi punto como origen") == 0) 
-        {
-        	
-        	//poner punto inicio mi localizacion
-        		Toast.makeText(this,"Selecciones el punto de destino", Toast.LENGTH_LONG).show();
-        		double latitude = mGoogleMap.getMyLocation().getLatitude();
-        		double longitude = mGoogleMap.getMyLocation().getLongitude();
-        		LatLng Position = new LatLng(latitude, longitude);
-        		fromPosition = Position;
-        		markerPoints.add(Position);
-        	//marker
-        		MarkerOptions options = new MarkerOptions();
-            	options.position(Position);
-            	options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
-            	mGoogleMap.addMarker(options);
-            	marcarPuntos();
-        	//put lisener para el segundo punto
-        		methodChangeMode(view);
-            	
-            		
-        } 
-        else 
-        	if(selectedItem.compareTo("Seleccionar dos puntos") == 0) 
-        		{
-        			Toast.makeText(this,"Seleccione el punto origen", Toast.LENGTH_LONG).show();
-        			methodChangeMode(view);
-        		}
-        
-        	if(fragment != null) 
-        	{
-            	tvTitle.setText(selectedItem);
-        	}
-        
-        // Hide menu anyway
-        mainLayout.toggleMenuRight();
-            }
-            else
-            {
-            	Toast.makeText(this,"Necesita conexion a internet", Toast.LENGTH_SHORT).show();
-            }
-    }
+//private void onMenuItemClickRight(AdapterView<?> parent, View view, int position, long id) throws JSONException {
+//    	
+//    	String selectedItem = lvMenuItemsRight[position];
+//        String currentItem = tvTitle.getText().toString();
+//        
+//        // Do nothing if selectedItem is currentItem
+//        if(selectedItem.compareTo(currentItem) == 0) {
+//            mainLayout.toggleMenuRight();
+//            return;
+//        }
+//            if (connectVerifyValue) {
+//				
+//			
+//        FragmentManager fm = MainActivity.this.getSupportFragmentManager();
+//        FragmentTransaction ft = fm.beginTransaction();
+//        Fragment fragment = null;
+//
+//        
+//        if(selectedItem.compareTo("Tomar mi punto como origen") == 0) 
+//        {
+//        	
+//        	//poner punto inicio mi localizacion
+//        		Toast.makeText(this,"Selecciones el punto de destino", Toast.LENGTH_LONG).show();
+//        		double latitude = mGoogleMap.getMyLocation().getLatitude();
+//        		double longitude = mGoogleMap.getMyLocation().getLongitude();
+//        		LatLng Position = new LatLng(latitude, longitude);
+//        		fromPosition = Position;
+//        		markerPoints.add(Position);
+//        	//marker
+//        		MarkerOptions options = new MarkerOptions();
+//            	options.position(Position);
+//            	options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+//            	mGoogleMap.addMarker(options);
+//            	marcarPuntos();
+//        	//put lisener para el segundo punto
+//        		methodChangeMode(view);
+//            	
+//            		
+//        } 
+//        else 
+//        	if(selectedItem.compareTo("Seleccionar dos puntos") == 0) 
+//        		{
+//        			Toast.makeText(this,"Seleccione el punto origen", Toast.LENGTH_LONG).show();
+//        			methodChangeMode(view);
+//        		}
+//        
+//        	if(fragment != null) 
+//        	{
+//            	tvTitle.setText(selectedItem);
+//        	}
+//        
+//        // Hide menu anyway
+//        mainLayout.toggleMenuRight();
+//            }
+//            else
+//            {
+//            	Toast.makeText(this,"Necesita conexion a internet", Toast.LENGTH_SHORT).show();
+//            }
+//    }
 
     
     
@@ -1052,7 +1095,7 @@ private void onMenuItemClickRight(AdapterView<?> parent, View view, int position
         				if(markerPoints.size()>1)
         				{
         					markerPoints.clear();
-        					mGoogleMap.clear();					
+        					//mGoogleMap.clear();					
         				}
         					// adicionar punto
         				markerPoints.add(point);
@@ -1063,12 +1106,11 @@ private void onMenuItemClickRight(AdapterView<?> parent, View view, int position
         					//color marker
         				if(markerPoints.size()==1){
         					Toast.makeText(context, "Seleccione el punto destino", Toast.LENGTH_LONG).show();
-        					
-        					options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+        					options.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_start));
         				}
         				else{ 
         					if(markerPoints.size()==2){
-        						options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
+        						options.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_end));
         					}
         				}
         					// Add marker al map
@@ -1086,7 +1128,10 @@ private void onMenuItemClickRight(AdapterView<?> parent, View view, int position
         		        	punteroRuta = 0;
         		        	mGoogleMap.setOnMapClickListener(null);
         		        	try {
-								marcarPuntos();
+								marcarPuntosAlerta();
+								marcarPuntosBloqueo();
+								marcarPuntosFavoritos();
+								marcarPuntosPosibesBloqueo();
 							} catch (JSONException e) {
 								e.printStackTrace();
 							}
@@ -1101,11 +1146,16 @@ private void onMenuItemClickRight(AdapterView<?> parent, View view, int position
         		});
     		}
         	else{
-        		
-        		markerPoints.clear();
         		puntosDeLaRuta.clear();
-        		mGoogleMap.clear();
+        		markerPoints.clear();
+        		//puntosDeLaRuta.clear();
+        		//mGoogleMap.clear();
         		mGoogleMap.setOnMapClickListener(null);
+        		
+        		marcarPuntosAlerta();
+        		marcarPuntosBloqueo();
+        		marcarPuntosFavoritos();
+        		marcarPuntosPosibesBloqueo();
         		
         		CameraPosition cameraPosition2 = new CameraPosition.Builder().target(new LatLng(-17.393792, -66.157110)).zoom(12).bearing(0).tilt(0).build();
 	            mGoogleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition2));
@@ -1117,7 +1167,7 @@ private void onMenuItemClickRight(AdapterView<?> parent, View view, int position
 
 	          	  //ayudaServicios help = new ayudaServicios();
 	                //puntosDeBloqueo = help.getPuntosBloqueoPersistente();
-	        	marcarPuntos();
+	        	
 //	                for(int i=0 ; i<puntosDeBloqueo.size() ; i++)
 //	  	  			{
 //	  	  				markerOptions.position(puntosDeBloqueo.get(i));
@@ -1227,10 +1277,10 @@ private void onMenuItemClickRight(AdapterView<?> parent, View view, int position
 			public void onMapClick(LatLng point) 
 			{
     				markerPoints.clear();
-					mGoogleMap.clear();
+					//mGoogleMap.clear();
 					MarkerOptions options = new MarkerOptions();
 					options.position(point);
-					options.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_yellow_accidente));
+					options.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_yellow_accidente_alert));
 					mGoogleMap.addMarker(options);
 					
 					double latitude = mGoogleMap.getMyLocation().getLatitude();
@@ -1242,7 +1292,7 @@ private void onMenuItemClickRight(AdapterView<?> parent, View view, int position
 						try {
 							ayudaServicios servicios = new ayudaServicios();
 							servicios.guardarPuntoAlerta("Accidente", codigo_usuario, point.latitude,point.longitude);
-							marcarPuntos();
+							//marcarPuntos();
 							
 						} catch (Exception e) {
 							System.out.println("hiloSecundarioMenu  home");
@@ -1268,10 +1318,10 @@ private void onMenuItemClickRight(AdapterView<?> parent, View view, int position
 			public void onMapClick(LatLng point) 
 			{
     				markerPoints.clear();
-					mGoogleMap.clear();
+					//mGoogleMap.clear();
 					MarkerOptions options = new MarkerOptions();
 					options.position(point);
-					options.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_yellow_policia));
+					options.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_yellow_policia_alert));
 					mGoogleMap.addMarker(options);
 					
 					double latitude = mGoogleMap.getMyLocation().getLatitude();
@@ -1283,7 +1333,7 @@ private void onMenuItemClickRight(AdapterView<?> parent, View view, int position
 						try {
 							ayudaServicios servicios = new ayudaServicios();
 							servicios.guardarPuntoAlerta("Redada", codigo_usuario, point.latitude,point.longitude);
-							marcarPuntos();
+							//marcarPuntos();
 						} catch (Exception e) {
 							System.out.println("hiloSecundarioMenu  home");
 							onStop();
@@ -1309,17 +1359,17 @@ private void onMenuItemClickRight(AdapterView<?> parent, View view, int position
 			public void onMapClick(LatLng point) 
 			{
     				markerPoints.clear();
-					mGoogleMap.clear();
+					//mGoogleMap.clear();
 					MarkerOptions options = new MarkerOptions();
 					options.position(point);
-					options.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_red_market));
+					options.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_rosado_market));
 //					options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
 					mGoogleMap.addMarker(options);
 					
 						try {
 							ayudaServicios servicios = new ayudaServicios();
-							servicios.guardarPuntoBloqueo(codigo_usuario, point.latitude,point.longitude);
-							marcarPuntos();
+							servicios.guardarPuntoBloqueo("Mercado",codigo_usuario, point.latitude,point.longitude);
+							//marcarPuntos();
 						} catch (Exception e) {
 							System.out.println("hiloSecundarioMenu  home");
 							onStop();
@@ -1337,16 +1387,16 @@ private void onMenuItemClickRight(AdapterView<?> parent, View view, int position
 			public void onMapClick(LatLng point) 
 			{
     				markerPoints.clear();
-					mGoogleMap.clear();
+					//mGoogleMap.clear();
 					MarkerOptions options = new MarkerOptions();
 					options.position(point);
-					options.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_red_school));
+					options.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_rosado_school));
 //					options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
 					mGoogleMap.addMarker(options);
 						try {
 							ayudaServicios servicios = new ayudaServicios();
-							servicios.guardarPuntoBloqueo(codigo_usuario, point.latitude,point.longitude);
-							marcarPuntos();
+							servicios.guardarPuntoBloqueo("Colegio",codigo_usuario, point.latitude,point.longitude);
+							//marcarPuntos();
 						} catch (Exception e) {
 							System.out.println("hiloSecundarioMenu  home");
 							onStop();
@@ -1363,10 +1413,10 @@ private void onMenuItemClickRight(AdapterView<?> parent, View view, int position
 			public void onMapClick(LatLng point) 
 			{
     				markerPoints.clear();
-					mGoogleMap.clear();
+					//mGoogleMap.clear();
 					MarkerOptions options = new MarkerOptions();
 					options.position(point);
-					options.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_yellow_trafico));
+					options.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_yellow_trafico_alert));
 //					options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW));
 					mGoogleMap.addMarker(options);
 					
@@ -1379,7 +1429,7 @@ private void onMenuItemClickRight(AdapterView<?> parent, View view, int position
 						try {
 							ayudaServicios servicios = new ayudaServicios();
 							servicios.guardarPuntoAlerta("Trafico", codigo_usuario, point.latitude,point.longitude);
-							marcarPuntos();
+							//marcarPuntos();
 						} catch (Exception e) {
 							System.out.println("hiloSecundarioMenu  home");
 							onStop();
@@ -1406,7 +1456,7 @@ private void onMenuItemClickRight(AdapterView<?> parent, View view, int position
     	    	if(homeFalse == "llenar")
 				{
 					markerPoints.clear();
-					mGoogleMap.clear();
+					//mGoogleMap.clear();
 					home = point;
 					MarkerOptions options = new MarkerOptions();
 					options.position(point);
@@ -1417,7 +1467,7 @@ private void onMenuItemClickRight(AdapterView<?> parent, View view, int position
 					try {
 						ayudaServicios servicios = new ayudaServicios();
 						servicios.guardarPunto("Casa", codigo_usuario, home.latitude,home.longitude);
-						marcarPuntos();
+						//marcarPuntos();
 					} catch (Exception e) {
 						System.out.println("hiloSecundarioMenu  home");
 						onStop();
@@ -1429,7 +1479,7 @@ private void onMenuItemClickRight(AdapterView<?> parent, View view, int position
 				if(workFalse == "llenar")
 				{
 					markerPoints.clear();
-					mGoogleMap.clear();
+					//mGoogleMap.clear();
 					work = point;
 					MarkerOptions options = new MarkerOptions();
 					options.position(point);
@@ -1440,7 +1490,7 @@ private void onMenuItemClickRight(AdapterView<?> parent, View view, int position
 					try {
 						ayudaServicios servicios = new ayudaServicios();
 						servicios.guardarPunto("Trabajo", codigo_usuario, work.latitude,work.longitude);
-						marcarPuntos();
+						//marcarPuntos();
 					} catch (Exception e) {
 						System.out.println("hiloSecundarioMenu  work");
 						onStop();
@@ -1453,55 +1503,193 @@ private void onMenuItemClickRight(AdapterView<?> parent, View view, int position
     }
     //------------------------------PRIVATE REFACTORIZACION----------------------
     
-    private void marcarPuntos() throws JSONException
+    private void marcarPuntosFavoritos() throws JSONException
     {
+    	markerOptions.title("Favorito");
+		
+    	if(home!=null ) 	
+    	{
+			markerOptions.position(home);
+    		markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_blue_home));
+    		markerOptions.snippet("Casa");
+			mGoogleMap.addMarker(markerOptions);
+		}
+		if(work!=null ) 	
+    	{
+			markerOptions.position(work);
+			markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_blue_work));
+			markerOptions.snippet("Trabajo");
+			mGoogleMap.addMarker(markerOptions);
+    	}
+		
+    }
+    private void marcarPuntosBloqueo() throws JSONException
+    {
+    	if (puntosDeBloqueo!=null && puntosDeBloqueo.size()>0) {
+			for (Map.Entry<LatLng, String> entry : puntosDeBloqueo.entrySet()) {
+				markerOptions.position(entry.getKey());
+				if (entry.getValue().equals("Colegio")) 
+				{
+					markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_red_school));
+					markerOptions.title("Bloqueo");
+					markerOptions.snippet("Colegio");
+					mGoogleMap.addMarker(markerOptions);
+				}
+				else
+				{
+					markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_red_market));
+					markerOptions.title("Bloqueo");
+					markerOptions.snippet("Mercado");
+					mGoogleMap.addMarker(markerOptions);
+				}
+			}
+		}
+	}
+    private void marcarPuntosPosibesBloqueo() throws JSONException
+    {
+    	if (puntosDeBloqueoPosibles!=null && puntosDeBloqueoPosibles.size()>0) {
+			for (Map.Entry<LatLng, String> entry : puntosDeBloqueoPosibles.entrySet()) {
+				markerOptions.position(entry.getKey());
+				if (entry.getValue().equals("Colegio")) 
+				{
+					markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_red_school));
+					markerOptions.title("Bloqueo");
+					markerOptions.snippet("Colegio");
+					mGoogleMap.addMarker(markerOptions);
+				}
+				else
+				{
+					markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_rosado_market));
+					markerOptions.title("Bloqueo");
+					markerOptions.snippet("Mercado");
+					mGoogleMap.addMarker(markerOptions);
+				}
+			}
+		}
+	}
+    private void marcarPuntosAlerta() throws JSONException
+    {
+    	//borrar los puntos anteriores
+    	Map<LatLng, String> list = null;
+    	try {
+    		notification.checkNotificationsNew(puntosDeAlerta);
+        	double latitude = mGoogleMap.getMyLocation().getLatitude();
+    		double longitude = mGoogleMap.getMyLocation().getLongitude();
+    		
+    		list = notification.getNotificationNearToPoint(latitude, longitude);
+        } catch (Exception e) {
+			// TODO: handle exception
+		}
+    	
     	mGoogleMap.clear();
-    	ayudaServicios aux = new ayudaServicios();
-		puntosDeAlerta = aux.getPuntosAlerta();
-		puntosDeBloqueo = aux.getPuntosBloqueoPersistente();
 		
 		if (puntosDeAlerta!=null && puntosDeAlerta.size()>0) {
-			for(int i=0 ; i<puntosDeAlerta.size() ; i++)
-			{
-				markerOptions.position(puntosDeAlerta.get(i));
-				markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_yellow_accidente));
-				markerOptions.title("titulo");
-				markerOptions.snippet("Population: 4,137,400");
-				//markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW));
-				mGoogleMap.addMarker(markerOptions);
+			for (Map.Entry<LatLng, String> entry : puntosDeAlerta.entrySet()) {
+				
+				
+				MarkerOptions marke = new MarkerOptions();
+				marke.position(entry.getKey());
+				marke.title("Alerta");
+					if (entry.getValue().equals("Accidente")) 
+					{
+						if (list!=null && list.size()>0 && list.containsKey(entry.getKey())) {
+							marke.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_yellow_accidente_alert));
+						}
+						else
+						{
+							marke.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_yellow_accidente));
+						}
+						marke.snippet("Accidente");
+					}
+					else
+					{
+						if (entry.getValue().equals("Trafico")) {
+							if (list!=null && list.size()>0 && list.containsKey(entry.getKey())) {
+								marke.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_yellow_trafico_alert));
+							}
+							else
+							{
+								marke.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_yellow_trafico));
+							}
+							
+							marke.snippet("Trafico");
+						}
+						else
+						{
+							if (list!=null && list.size()>0 && list.containsKey(entry.getKey())) {
+								marke.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_yellow_policia_alert));
+							}
+							else
+							{
+								marke.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_yellow_policia));
+							}
+							
+							marke.snippet("Redada");
+						}
+					}
+					
+					try {
+						mGoogleMap.addMarker(marke);
+					} catch (Exception e) {
+						e.getMessage();
+						e.getMessage();
+						// TODO: handle exception
+					}
 			}
 		}
-		if (puntosDeBloqueo!=null && puntosDeBloqueo.size()>0) {
-			for(int i=0 ; i<puntosDeBloqueo.size() ; i++)
-			{
-				markerOptions.position(puntosDeBloqueo.get(i));
-				markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_red_school));
-				//markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
-				mGoogleMap.addMarker(markerOptions);
+	}
+    
+    private void marcarPuntosDeRuta()
+    {
+    	rectLine = new PolylineOptions().width(10).color(Color.GREEN);
+		if(puntosDeLaRuta != null && puntosDeLaRuta.size()>0)
+		{
+			for (int i = 0; i < puntosDeLaRuta.size(); i++) {
+				rectLine.add(puntosDeLaRuta.get(i));
 			}
+			mGoogleMap.addPolyline(rectLine);
+			markerOptions.position(fromPosition);
+			markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_start));
+    		mGoogleMap.addMarker(markerOptions);
+			
+			markerOptions.position(toPosition);
+    		markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_end));
+			mGoogleMap.addMarker(markerOptions);
 		}
-		
-		JSONArray puntoCasaJson= aux.getPunto("Casa", codigo_usuario);
-		JSONArray puntoTrabajoJson= aux.getPunto("Trabajo", codigo_usuario);
-		if(puntoCasaJson!=null && puntoCasaJson.length() != 0) 	
+    }
+    private void llenarPuntosFavoritos()
+    {
+    	JSONArray puntoCasaJson= null;
+    	JSONArray puntoTrabajoJson= null;
+    	
+    	ayudaServicios aux = new ayudaServicios();
+    	puntoCasaJson = aux.getPunto("Casa", codigo_usuario);
+    	puntoTrabajoJson = aux.getPunto("Trabajo", codigo_usuario);
+    	
+    	if(puntoCasaJson!=null && puntoCasaJson.length() > 0) 	
     	{
-			double lat = puntoCasaJson.getJSONObject(0).getDouble("latitude");
-    		double lon = puntoCasaJson.getJSONObject(0).getDouble("longitude");
-    		
-    		markerOptions.position(new LatLng(lat, lon));
-    		markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_blue_home));
-			mGoogleMap.addMarker(markerOptions);
+    		double lat=0 ,lon = 0;
+			try {
+				lat = puntoCasaJson.getJSONObject(0).getDouble("latitude");
+				lon = puntoCasaJson.getJSONObject(0).getDouble("longitude");
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+    		home = new LatLng(lat, lon);
     	}
-		if(puntoTrabajoJson!=null && puntoTrabajoJson.length() != 0) 	
+    	if(puntoTrabajoJson!=null && puntoTrabajoJson.length() > 0) 	
     	{
-			double lat = puntoTrabajoJson.getJSONObject(0).getDouble("latitude");
-    		double lon = puntoTrabajoJson.getJSONObject(0).getDouble("longitude");
-    		
-    		markerOptions.position(new LatLng(lat, lon));
-    		markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_blue_work));
-			mGoogleMap.addMarker(markerOptions);
+    		double lat=0 ,lon = 0;
+			try {
+				lat = puntoTrabajoJson.getJSONObject(0).getDouble("latitude");
+				lon = puntoTrabajoJson.getJSONObject(0).getDouble("longitude");
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+    		work = new LatLng(lat, lon);
     	}
-		
     }
     
 }
