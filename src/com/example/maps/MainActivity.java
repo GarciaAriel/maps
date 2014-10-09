@@ -162,9 +162,9 @@ public class MainActivity extends FragmentActivity
             public void onClick(View v) {
             	toggleButton1 = (ToggleButton) findViewById(R.id.toggleButton1);
             	
-//            	if (toggleButton1.isChecked()) {
-//					toggleButton1.setChecked(false);
-//				}
+            	if (toggleButton1.isChecked() && puntosDeLaRuta != null && puntosDeLaRuta.size()==0) {
+					toggleButton1.setChecked(false);
+				}
             	
             	
             	
@@ -174,16 +174,16 @@ public class MainActivity extends FragmentActivity
 				TextView text4 = (TextView) findViewById(R.id.TextView10);
 				text4.setVisibility(View.GONE);
             	
-            	
             	LinearLayout linear = (LinearLayout) findViewById(R.id.menu_options_1);
-				linear.setVisibility(View.VISIBLE);
+				linear.setVisibility(View.GONE);
+				
 				LinearLayout linear1 = (LinearLayout) findViewById(R.id.menu_options_2);
 				linear1.setVisibility(View.VISIBLE);
 				LinearLayout linear2 = (LinearLayout) findViewById(R.id.menu_options_3);
 				linear2.setVisibility(View.VISIBLE);
 				
 				TextView text1 = (TextView) findViewById(R.id.TextView01);
-				text1.setVisibility(View.VISIBLE);
+				text1.setVisibility(View.GONE);
 				TextView text2 = (TextView) findViewById(R.id.TextView02);
 				text2.setVisibility(View.VISIBLE);
 				TextView text3 = (TextView) findViewById(R.id.TextView03);
@@ -334,14 +334,14 @@ public class MainActivity extends FragmentActivity
 			public void onClick(View v) {
 				//ocultar otro menu // ver otro
 				LinearLayout linear = (LinearLayout) findViewById(R.id.menu_options_1);
-				linear.setVisibility(View.GONE);
+				linear.setVisibility(View.VISIBLE);
 				LinearLayout linear1 = (LinearLayout) findViewById(R.id.menu_options_2);
 				linear1.setVisibility(View.GONE);
 				LinearLayout linear2 = (LinearLayout) findViewById(R.id.menu_options_3);
 				linear2.setVisibility(View.GONE);
 				
 				TextView text1 = (TextView) findViewById(R.id.TextView01);
-				text1.setVisibility(View.GONE);
+				text1.setVisibility(View.VISIBLE);
 				TextView text2 = (TextView) findViewById(R.id.TextView02);
 				text2.setVisibility(View.GONE);
 				TextView text3 = (TextView) findViewById(R.id.TextView03);
@@ -741,21 +741,27 @@ public class MainActivity extends FragmentActivity
             FragmentTransaction ft = fm.beginTransaction();
             Fragment fragment = null;
             
-            	JSONArray puntoCasaJson= null;
-            	try {
-            		ayudaServicios servicios = new ayudaServicios();
-            		puntoCasaJson = servicios.getPunto("Casa", codigo_usuario);
-    			} catch (Exception e) {
-    				Toast.makeText(this,"menu get punto casa", Toast.LENGTH_LONG).show();
-    				super.onStop();
-    		        //finish();
-    			}
+            	//JSONArray puntoCasaJson= null;
+//            	try {
+//            		ayudaServicios servicios = new ayudaServicios();
+//            		puntoCasaJson = servicios.getPunto("Casa", codigo_usuario);
+//    			} catch (Exception e) {
+//    				Toast.makeText(this,"menu get punto casa", Toast.LENGTH_LONG).show();
+//    				super.onStop();
+//    		        //finish();
+//    			}
             	
-            	if(puntoCasaJson!=null || puntoCasaJson.length() == 0) 	
+            	if(home == null)
             	{
             		Toast.makeText(this,"Seleccione Punto a CASA", Toast.LENGTH_LONG).show();
             		homeFalse = "llenar";
+            		toggleButton1 = (ToggleButton) findViewById(R.id.toggleButton1);
+                	
+                	if (toggleButton1.isChecked()) {
+    					toggleButton1.setChecked(false);
+    				}
             		hiloSecundarioMenu();
+            		
             	}
             	else 
             	{
@@ -765,14 +771,13 @@ public class MainActivity extends FragmentActivity
             		LatLng Position = new LatLng(latitude, longitude);
             		fromPosition = Position;
             		
-            		double lat = puntoCasaJson.getJSONObject(0).getDouble("latitude");
-            		double lon = puntoCasaJson.getJSONObject(0).getDouble("longitude");
+            		//double lat = puntoCasaJson.getJSONObject(0).getDouble("latitude");
+            		//double lon = puntoCasaJson.getJSONObject(0).getDouble("longitude");
             		
-            		toPosition = new LatLng(lat, lon);
+            		toPosition = home;// new LatLng(lat, lon);
             		
             		obtainRoute help = new obtainRoute();
     	        	help.execute(ok);
-
         		}
            
     	}
@@ -787,23 +792,28 @@ public class MainActivity extends FragmentActivity
             FragmentTransaction ft = fm.beginTransaction();
             Fragment fragment = null;
             
-    		JSONArray puntoTrabajoJson=null;
-    		try {
-    			ayudaServicios servicios = new ayudaServicios();
-        		puntoTrabajoJson = servicios.getPunto("Trabajo", codigo_usuario);
-			} catch (Exception e) {
-				Toast.makeText(this,"menu get punto trabajo", Toast.LENGTH_LONG).show();
-				super.onStop();
-		      //  finish();
-			}
+//    		JSONArray puntoTrabajoJson=null;
+//    		try {
+//    			ayudaServicios servicios = new ayudaServicios();
+//        		puntoTrabajoJson = servicios.getPunto("Trabajo", codigo_usuario);
+//			} catch (Exception e) {
+//				Toast.makeText(this,"menu get punto trabajo", Toast.LENGTH_LONG).show();
+//				super.onStop();
+//		      //  finish();
+//			}
     		
 		
-    		if(puntoTrabajoJson!=null|| puntoTrabajoJson.length() == 0) 	
+    		if(work==null) 	
     		{
-    		
     			Toast.makeText(this,"Seleccione punto al TRABAJO", Toast.LENGTH_LONG).show();
     			workFalse = "llenar";
+    			toggleButton1 = (ToggleButton) findViewById(R.id.toggleButton1);
+            	
+            	if (toggleButton1.isChecked()) {
+					toggleButton1.setChecked(false);
+				}
     			hiloSecundarioMenu();
+    			
     		}
     		else 
     		{
@@ -813,10 +823,10 @@ public class MainActivity extends FragmentActivity
     			LatLng Position = new LatLng(latitude, longitude);
     			fromPosition = Position;
     		
-    			double lat = puntoTrabajoJson.getJSONObject(0).getDouble("latitude");
-    			double lon = puntoTrabajoJson.getJSONObject(0).getDouble("longitude");
+    			//double lat = puntoTrabajoJson.getJSONObject(0).getDouble("latitude");
+    			//double lon = puntoTrabajoJson.getJSONObject(0).getDouble("longitude");
     		
-    			toPosition = new LatLng(lat, lon);
+    			toPosition = work;// new LatLng(lat, lon);
 				
     			obtainRoute help = new obtainRoute();
     			help.execute(ok);
@@ -1552,7 +1562,7 @@ public class MainActivity extends FragmentActivity
 				markerOptions.position(entry.getKey());
 				if (entry.getValue().equals("Colegio")) 
 				{
-					markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_red_school));
+					markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_rosado_school));
 					markerOptions.title("Bloqueo");
 					markerOptions.snippet("Colegio");
 					mGoogleMap.addMarker(markerOptions);
