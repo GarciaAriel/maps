@@ -1246,24 +1246,28 @@ public class MainActivity extends FragmentActivity
 //						}
 					}
 					LatLng punto1 = puntosRuta.get(pos+1);
-					//((y2 - y1)/(x2-x1));
-					double mm1 = ((point.longitude - punto1.longitude)/(point.latitude-punto1.latitude));
-					double mm2 = ((point.longitude - punto2.longitude)/(point.latitude-punto2.latitude));
 					
-		    		double atamm1 = Math.atan(mm1);
-		    		double atamm2 = Math.atan(mm2);
-		    		
-		    		double grados1 = Math.toDegrees(atamm1);
-		    		double grados2 = Math.toDegrees(atamm2);
+					getRouteTask2 aux = new getRouteTask2();
+					double angulo1 = aux.finall(point.latitude, point.longitude, punto2.latitude, punto2.longitude);
+					double angulo2 = aux.finall(punto2.latitude, punto2.longitude,punto1.latitude, punto1.longitude);
+					
+					//((y2 - y1)/(x2-x1));
+//					double mm1 = ((point.longitude - punto2.longitude)/(point.latitude-punto2.latitude));
+//					double mm2 = ((punto2.longitude - punto1.longitude)/(punto2.latitude-punto1.latitude));
+//					
+//		    		double atamm1 = Math.atan(mm1);
+//		    		double atamm2 = Math.atan(mm2);
+//		    		
+//		    		double grados1 = Math.toDegrees(atamm1);
+//		    		double grados2 = Math.toDegrees(atamm2);
 		    		
 		    		System.out.println("======================================");
-		    		System.out.println(grados1);
-		    		System.out.println(grados2);
+		    		System.out.println("angulo1: "+angulo1);
+		    		System.out.println("angulo2: "+angulo2);
 		    		
-		    		double res =(grados2 - grados1);
-		    		double res2 = Math.abs(res);
-					
-					if (res2<15) {
+		    		double res =(angulo1 - angulo2);
+		    		
+		    		if (res<10 && res>-10) {
 						servicePlayAudioStraight(v);
 						Handler handler = new Handler();
 				        handler.postDelayed(new Runnable() {
@@ -1276,7 +1280,7 @@ public class MainActivity extends FragmentActivity
 					}
 					else
 					{
-						if (res>0) {
+						if (res>80 && res<100) {
 							servicePlayAudioLeft(v);
 							Handler handler = new Handler();
 					        handler.postDelayed(new Runnable() {
@@ -1284,18 +1288,46 @@ public class MainActivity extends FragmentActivity
 					                // acciones que se ejecutan tras los milisegundos
 					                serviceStopAudioLeft(v);;
 					            }
-					        }, 3000);
+					        }, 4000);
 						}
 						else
 						{
-							servicePlayAudioRight(v);
-							Handler handler = new Handler();
-					        handler.postDelayed(new Runnable() {
-					            public void run() {
-					                // acciones que se ejecutan tras los milisegundos
-					                serviceStopAudioRight(v);;
-					            }
-					        }, 3000);
+							if (res<-80 && res>-100) {
+								servicePlayAudioRight(v);
+								Handler handler = new Handler();
+						        handler.postDelayed(new Runnable() {
+						            public void run() {
+						                // acciones que se ejecutan tras los milisegundos
+						                serviceStopAudioRight(v);;
+						            }
+						        }, 3000);
+							}
+							else
+							{
+								if (res>260 && res<280) {
+									servicePlayAudioRight(v);
+									Handler handler = new Handler();
+							        handler.postDelayed(new Runnable() {
+							            public void run() {
+							                // acciones que se ejecutan tras los milisegundos
+							                serviceStopAudioRight(v);;
+							            }
+							        }, 3000);
+								}
+								else
+								{
+									if (res<-260 && res>-280) {
+										servicePlayAudioLeft(v);
+										Handler handler = new Handler();
+								        handler.postDelayed(new Runnable() {
+								            public void run() {
+								                // acciones que se ejecutan tras los milisegundos
+								                serviceStopAudioLeft(v);
+								            }
+								        }, 3000);
+									}
+								}
+							}
 						}
 					}
 		    					
