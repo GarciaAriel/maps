@@ -106,6 +106,8 @@ public class MainActivity extends FragmentActivity
     static LatLng before = null;
     static LatLng after = null;
     
+    getRouteTask2 getRoute = new getRouteTask2();
+    
     ArrayList<LatLng> puntosRuta = new ArrayList<LatLng>();
     //ArrayList<LatLng> puntosDeBloqueo = new ArrayList<LatLng>();
     //ArrayList<LatLng> puntosDeAlerta = new ArrayList<LatLng>();
@@ -592,7 +594,7 @@ public class MainActivity extends FragmentActivity
 		@Override
 		protected String doInBackground(String... params) {
 			try {
-				getRouteTask2 getRoute = new getRouteTask2();
+				
 				ArrayList<LatLng> listPoint;
 				
 				puntosDeLaRuta = getRoute.get_route(fromPosition,toPosition,getPointsMap(puntosDeBloqueo));
@@ -1112,7 +1114,6 @@ public class MainActivity extends FragmentActivity
         				if(markerPoints.size()>1)
         				{
         					markerPoints.clear();
-        					//mGoogleMap.clear();					
         				}
         					// adicionar punto
         				markerPoints.add(point);
@@ -1135,10 +1136,11 @@ public class MainActivity extends FragmentActivity
         				
         				if(markerPoints.size() >= 2)
         				{		
-        					
-        					//Toast.makeText(this,"Seleccione el punto destino", Toast.LENGTH_LONG).show();
         					fromPosition = markerPoints.get(0);
         					toPosition = markerPoints.get(1);
+        					
+        					//reiniciar para nuevo ini y fin
+        					getRoute = new getRouteTask2();
         					
         		        	obtainRoute help = new obtainRoute();
         		        	help.execute();
@@ -1199,6 +1201,26 @@ public class MainActivity extends FragmentActivity
     	
     }
     
+    public void siguiente_camino(final View v)
+    {
+    	obtainRoute help = new obtainRoute();
+    	help.execute();
+    	punteroRuta = 0;
+//    	mGoogleMap.setOnMapClickListener(null);
+    	try {
+			marcarPuntosAlerta();
+			marcarPuntosBloqueo();
+			marcarPuntosFavoritos();
+			marcarPuntosPosibesBloqueo();
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+    	
+    	//boton visible iniciar ruta
+    	Button start_rute = (Button)findViewById(R.id._ini_ruta);
+    	start_rute.setVisibility(View.VISIBLE);
+    }
+    
     public void iniciar_recorrido(final View v)
     {
     	puntosRuta.clear();
@@ -1250,7 +1272,7 @@ public class MainActivity extends FragmentActivity
 						before = puntosRuta.get(pos-1);
 					}
 					
-					getRouteTask2 aux = new getRouteTask2();
+					//getRouteTask2 aux = new getRouteTask2();
 
 					if (before == null) {
 						servicePlayAudioStraight(v);
@@ -1276,9 +1298,9 @@ public class MainActivity extends FragmentActivity
 						}
 						else
 						{
-							double angulo1 = aux.finall(before.latitude,before.longitude,punto2.latitude,punto2.longitude);
-							double angulo2 = aux.finall(punto2.latitude, punto2.longitude,after.latitude, after.longitude);
-							double angulo3 = aux.finall(point.latitude, point.longitude,punto2.latitude,punto2.longitude);
+							double angulo1 = getRoute.finall(before.latitude,before.longitude,punto2.latitude,punto2.longitude);
+							double angulo2 = getRoute.finall(punto2.latitude, punto2.longitude,after.latitude, after.longitude);
+							double angulo3 = getRoute.finall(point.latitude, point.longitude,punto2.latitude,punto2.longitude);
 							
 							double resp = angulo1 - angulo2;
 							double resp2 = angulo3 - angulo2;
@@ -1882,7 +1904,8 @@ public class MainActivity extends FragmentActivity
     private void marcarPuntosDeRuta()
     {
     	rectLine = new PolylineOptions().width(10).color(Color.GREEN);
-		if(puntosRuta != null && puntosRuta.size()>0)
+
+    	if(puntosRuta != null && puntosRuta.size()>0)
 		{
 			for (int i = 0; i < puntosRuta.size(); i++) {
 				rectLine.add(puntosRuta.get(i));
@@ -1891,6 +1914,7 @@ public class MainActivity extends FragmentActivity
 				markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW));
 				mGoogleMap.addMarker(markerOptions);
 			}
+			
 			mGoogleMap.addPolyline(rectLine);
 			markerOptions.position(fromPosition);
 			markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_start));
@@ -1902,7 +1926,10 @@ public class MainActivity extends FragmentActivity
 		}
 		else{
 			if(puntosDeLaRuta != null && puntosDeLaRuta.size()>0){
+				
+				
 				for (int i = 0; i < puntosDeLaRuta.size(); i++) {
+
 					rectLine.add(puntosDeLaRuta.get(i));
 					
 					markerOptions.position(puntosDeLaRuta.get(i));

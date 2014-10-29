@@ -1515,7 +1515,7 @@ containing a value of this type.
         public static final int TextView02=0x7f060056;
         public static final int TextView03=0x7f06005c;
         public static final int TextView10=0x7f060061;
-        public static final int _ini_ruta=0x7f060067;
+        public static final int _ini_ruta=0x7f060068;
         public static final int action_bar=0x7f060030;
         public static final int action_bar_activity_content=0x7f060029;
         public static final int action_bar_container=0x7f06002f;
@@ -1535,7 +1535,7 @@ containing a value of this type.
         public static final int always=0x7f060021;
         public static final int beginning=0x7f060026;
         public static final int bottom=0x7f060005;
-        public static final int button1=0x7f06006c;
+        public static final int button1=0x7f060067;
         public static final int button10=0x7f060054;
         public static final int button11=0x7f060055;
         public static final int button13=0x7f060059;
@@ -1571,8 +1571,8 @@ containing a value of this type.
         public static final int fill=0x7f06000d;
         public static final int fill_horizontal=0x7f06000b;
         public static final int fill_vertical=0x7f060009;
-        public static final int fragment_listview_listview=0x7f06006a;
-        public static final int fragment_main_textview=0x7f06006b;
+        public static final int fragment_listview_listview=0x7f06006b;
+        public static final int fragment_main_textview=0x7f06006c;
         public static final int fragment_main_textview10=0x7f060052;
         public static final int fragment_main_textview11=0x7f060057;
         public static final int fragment_main_textview12=0x7f06005d;
@@ -1590,7 +1590,7 @@ containing a value of this type.
         public static final int left=0x7f060006;
         public static final int listMode=0x7f060017;
         public static final int list_item=0x7f06003d;
-        public static final int map=0x7f060069;
+        public static final int map=0x7f06006a;
         public static final int menu_options=0x7f060050;
         public static final int menu_options_1=0x7f060053;
         public static final int menu_options_10=0x7f060062;
@@ -1625,7 +1625,7 @@ containing a value of this type.
         public static final int tabMode=0x7f060018;
         public static final int terrain=0x7f060015;
         public static final int title=0x7f06003f;
-        public static final int toggleButton1=0x7f060068;
+        public static final int toggleButton1=0x7f060069;
         public static final int top=0x7f060004;
         public static final int top_action_bar=0x7f060034;
         public static final int up=0x7f060035;

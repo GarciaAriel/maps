@@ -34,8 +34,8 @@ public class GMapV2GetRouteDirection {
         String url = "http://maps.googleapis.com/maps/api/directions/xml?"
                 + "origin=" + start.latitude + "," + start.longitude 
                 + "&destination=" + end.latitude + "," + end.longitude
-                + "&sensor=false&units=metric&mode=driving";
-        //+ "&alternatives=true"
+                + "&sensor=false&units=metric&mode=driving"
+                + "&alternatives=true";
 
         try 
         {

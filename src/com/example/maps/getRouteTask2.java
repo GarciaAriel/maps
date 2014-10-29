@@ -13,7 +13,7 @@ import com.google.android.gms.maps.model.PolylineOptions;
 
 public class getRouteTask2 {
 	private int distanceToThePointOnLockRoad = 60;
-	private int distanceToThePointOnLockPoint = 200;
+	private int distanceToThePointOnLockPoint=200;//verifica la cercania del nuevo punto medio a los puntos de bloqueo
 	private int distanceToMoveAwayThePointLock = 200;
 	
 	
@@ -36,8 +36,9 @@ public class getRouteTask2 {
 			mapLockPoints.put(puntosBloqueo.get(i),"ok");
 		}
 		
-		//pedir un camino y verificar si hay bloqueo serca 
+		//pedir un camino y verificar si hay bloqueo serca /retorna los puntos de bloqueo {si} 
 		Map<LatLng,String> respuesta = getRouteVerifyPointsLock(fromP,toP,mapLockPoints);
+		//verifica si hay algun problema [true si hay algun problema]
 		LatLng bloqueo = verificarPuntoConflicto(respuesta);
 		
 		//si el camino es bueno aniado los puntos
@@ -50,9 +51,6 @@ public class getRouteTask2 {
 		{
 			//calculo math resta perpendicular
 			LatLng newPointMedio = getPointPerpendicular(fromP,toP,bloqueo,2);
-//			System.out.println("=============================");
-//			System.out.println("=============================");
-//			System.out.println("Latitude: "+newPointMedio.latitude+" longitude: "+newPointMedio.longitude);
 			
 			//verificar si esta cerca de otro pundo de bloqueo
 			int dir = 3;
@@ -79,6 +77,7 @@ public class getRouteTask2 {
         if(document != null)
         {
         	directionPoint = v2GetRouteDirection.getDirection(document);
+        	
         	ContenedorTemporalPuntos.clear();
         	ContenedorTemporalPuntos = directionPoint;
       	  //if -> puntos de bloqueo >=0 tengo algo que comparar
