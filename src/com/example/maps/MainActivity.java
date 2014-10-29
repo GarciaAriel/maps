@@ -102,6 +102,11 @@ public class MainActivity extends FragmentActivity
     Map<LatLng, String> puntosDeBloqueoPosibles = new LinkedHashMap<LatLng, String>();
     Map<LatLng, String> puntosDeAlerta = new LinkedHashMap<LatLng, String>();
     Map<LatLng, String> puntosDeAlertaCercanos = new LinkedHashMap<LatLng, String>();
+    
+    static LatLng before = null;
+    static LatLng after = null;
+    
+    ArrayList<LatLng> puntosRuta = new ArrayList<LatLng>();
     //ArrayList<LatLng> puntosDeBloqueo = new ArrayList<LatLng>();
     //ArrayList<LatLng> puntosDeAlerta = new ArrayList<LatLng>();
     String bloqueoFalse= "false";
@@ -1196,41 +1201,38 @@ public class MainActivity extends FragmentActivity
     
     public void iniciar_recorrido(final View v)
     {
-    	
+    	puntosRuta.clear();
+    	puntosRuta.add(puntosDeLaRuta.get(0));
+		double distance7;
+		double x11,x22,y11,y22;
+		GMapV2GetRouteDirection route = new GMapV2GetRouteDirection();
+		for (int i = 0; i < puntosDeLaRuta.size()-1; i++) {
+			x11 = puntosDeLaRuta.get(i).latitude;
+			y11 = puntosDeLaRuta.get(i).longitude;
+    		
+			x22 = puntosDeLaRuta.get(i+1).latitude;
+			y22 = puntosDeLaRuta.get(i+1).longitude;
+			distance7 = route.CalculationByDistance(x11, y11, x22,y22);
+			if (distance7>15) {
+				puntosRuta.add(puntosDeLaRuta.get(i+1));
+			}
+		}
+		
     	mGoogleMap.setOnMapClickListener(new OnMapClickListener(){
 			
 			@Override
 			public void onMapClick(LatLng point) 
 			{
-				if (puntosDeLaRuta.size() > 0) {
-					ArrayList<LatLng> puntosRuta = new ArrayList<LatLng>();
-					puntosRuta.add(puntosDeLaRuta.get(0));
-					double distance7;
-					double x11,x22,y11,y22;
+				
+				if (puntosRuta.size() > 0) {
+					before = null;
+					after = null;
 					GMapV2GetRouteDirection route = new GMapV2GetRouteDirection();
-					for (int i = 0; i < puntosDeLaRuta.size()-1; i++) {
-						x11 = puntosDeLaRuta.get(i).latitude;
-						y11 = puntosDeLaRuta.get(i).longitude;
-			    		
-						x22 = puntosDeLaRuta.get(i+1).latitude;
-						y22 = puntosDeLaRuta.get(i+1).longitude;
-						distance7 = route.CalculationByDistance(x11, y11, x22,y22);
-						if (distance7>10) {
-							puntosRuta.add(puntosDeLaRuta.get(i+1));
-						}
-					}
-					
-					
-//		    	   	double latitude = mGoogleMap.getMyLocation().getLatitude();
-//					double longitude = mGoogleMap.getMyLocation().getLongitude();
-//					LatLng myPos = new LatLng(latitude, longitude);
-					
-		    		//int res = punteroRuta; no sirve
-					//int res = help.verificarMyPosCercaCamino(puntosDeLaRuta.get(puntosDeLaRuta.size()-4),puntosDeLaRuta);
+
 					LatLng punto2=puntosRuta.get(0);
-					//GMapV2GetRouteDirection route = new GMapV2GetRouteDirection();
+
 					double distance1 = route.CalculationByDistance(point.latitude,point.longitude, punto2.latitude,punto2.longitude);
-					int pos =0;
+					int pos = 0;
 					for (int i = 1; i < puntosRuta.size(); i++) {
 						double distance = route.CalculationByDistance(point.latitude,point.longitude,puntosRuta.get(i).latitude,puntosRuta.get(i).longitude);
 						
@@ -1240,110 +1242,130 @@ public class MainActivity extends FragmentActivity
 							punto2 = puntosRuta.get(i);
 							distance1 = distance;
 						}
-//						if (distance<distance1) {
-//							punto1 = punto2;
-//							punto2 = puntosDeLaRuta.get(i);
-//						}
 					}
-					LatLng punto1 = puntosRuta.get(pos+1);
+					if (puntosRuta.size()>pos+1) {
+						after = puntosRuta.get(pos+1);
+					}
+					if (pos>0) {
+						before = puntosRuta.get(pos-1);
+					}
 					
 					getRouteTask2 aux = new getRouteTask2();
-					double angulo1 = aux.finall(point.latitude, point.longitude, punto2.latitude, punto2.longitude);
-					double angulo2 = aux.finall(punto2.latitude, punto2.longitude,punto1.latitude, punto1.longitude);
-					
-					//((y2 - y1)/(x2-x1));
-//					double mm1 = ((point.longitude - punto2.longitude)/(point.latitude-punto2.latitude));
-//					double mm2 = ((punto2.longitude - punto1.longitude)/(punto2.latitude-punto1.latitude));
-//					
-//		    		double atamm1 = Math.atan(mm1);
-//		    		double atamm2 = Math.atan(mm2);
-//		    		
-//		    		double grados1 = Math.toDegrees(atamm1);
-//		    		double grados2 = Math.toDegrees(atamm2);
-		    		
-		    		System.out.println("======================================");
-		    		System.out.println("angulo1: "+angulo1);
-		    		System.out.println("angulo2: "+angulo2);
-		    		
-		    		double res =(angulo1 - angulo2);
-		    		
-		    		if (res<10 && res>-10) {
+
+					if (before == null) {
 						servicePlayAudioStraight(v);
+						punto2 = after;
 						Handler handler = new Handler();
 				        handler.postDelayed(new Runnable() {
 				            public void run() {
 				                // acciones que se ejecutan tras los milisegundos
 				                serviceStopAudioStraight(v);;
 				            }
-				        }, 4000);
-
+				        }, 5000);
 					}
 					else
-					{
-						if (res>80 && res<100) {
-							servicePlayAudioLeft(v);
+						if (after == null) {
+							servicePlayAudioStraight(v);
 							Handler handler = new Handler();
 					        handler.postDelayed(new Runnable() {
 					            public void run() {
 					                // acciones que se ejecutan tras los milisegundos
-					                serviceStopAudioLeft(v);;
+					                serviceStopAudioStraight(v);;
 					            }
-					        }, 4000);
+					        }, 5000);
 						}
 						else
 						{
-							if (res<-80 && res>-100) {
-								servicePlayAudioRight(v);
+							double angulo1 = aux.finall(before.latitude,before.longitude,punto2.latitude,punto2.longitude);
+							double angulo2 = aux.finall(punto2.latitude, punto2.longitude,after.latitude, after.longitude);
+							double angulo3 = aux.finall(point.latitude, point.longitude,punto2.latitude,punto2.longitude);
+							
+							double resp = angulo1 - angulo2;
+							double resp2 = angulo3 - angulo2;
+							
+							if ( (resp<10 && resp>-10) ||  (resp>350 && resp<-350)){//mismo sentido
+								if ( (resp2<10 && resp2>-10) ||  (resp2>350 && resp2<-350)){//mismo sentido
+									servicePlayAudioStraight(v);
+								}
+								else{//puede existir otro if pero creo que no ayudaria
+									servicePlayAudioStraight(v);
+									punto2 = after;
+								}
 								Handler handler = new Handler();
 						        handler.postDelayed(new Runnable() {
 						            public void run() {
 						                // acciones que se ejecutan tras los milisegundos
-						                serviceStopAudioRight(v);;
+						                serviceStopAudioStraight(v);;
 						            }
-						        }, 3000);
+						        }, 5000);
 							}
-							else
-							{
-								if (res>260 && res<280) {
-									servicePlayAudioRight(v);
-									Handler handler = new Handler();
-							        handler.postDelayed(new Runnable() {
-							            public void run() {
-							                // acciones que se ejecutan tras los milisegundos
-							                serviceStopAudioRight(v);;
-							            }
-							        }, 3000);
-								}
-								else
-								{
-									if (res<-260 && res>-280) {
-										servicePlayAudioLeft(v);
+							else{
+								if((resp>-100 && resp<-80)||(resp>260 && resp<280)) { //giro derecha
+									if((resp2>-100 && resp2<-80)||(resp2>260 && resp2<280)) { //giro derecha
+										servicePlayAudioRight(v);
 										Handler handler = new Handler();
 								        handler.postDelayed(new Runnable() {
 								            public void run() {
 								                // acciones que se ejecutan tras los milisegundos
-								                serviceStopAudioLeft(v);
+								                serviceStopAudioRight(v);;
 								            }
-								        }, 3000);
+								        }, 5000);
+									}
+									else{
+										servicePlayAudioStraight(v);
+										punto2 = after;
+										Handler handler = new Handler();
+								        handler.postDelayed(new Runnable() {
+								            public void run() {
+								                // acciones que se ejecutan tras los milisegundos
+								                serviceStopAudioStraight(v);;
+								            }
+								        }, 5000);
+									}
+								}
+								else{
+									if ((resp>80 && resp<100)||(resp<-260 && resp>-280)) {//giro izq
+										if ((resp2>80 && resp2<100)||(resp2<-260 && resp2>-280)) {//giro izq
+											servicePlayAudioLeft(v);
+											Handler handler = new Handler();
+									        handler.postDelayed(new Runnable() {
+									            public void run() {
+									                // acciones que se ejecutan tras los milisegundos
+									                serviceStopAudioLeft(v);;
+									            }
+									        }, 5000);
+										}
+										else{
+											servicePlayAudioStraight(v);
+											punto2 = after;
+											Handler handler = new Handler();
+									        handler.postDelayed(new Runnable() {
+									            public void run() {
+									                // acciones que se ejecutan tras los milisegundos
+									                serviceStopAudioStraight(v);;
+									            }
+									        }, 5000);
+										}
 									}
 								}
 							}
 						}
-					}
-		    					
-						 
 					
-		    		
-		    		
-		    		
 					markerOptions.position(punto2);
 					markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_blue_home));
 					mGoogleMap.addMarker(markerOptions);
 					
-					markerOptions.position(punto1);
-					markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_yellow_policia));
-		    		//markerOptions.icon(BitmapDescriptorFactory.defaultMarker());
-					mGoogleMap.addMarker(markerOptions);
+					if (before !=null) {
+						markerOptions.position(before);
+						markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_yellow_policia));
+			    		mGoogleMap.addMarker(markerOptions);
+					}
+					
+					if (after !=null) {
+						markerOptions.position(after);
+						markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_red_school));
+						mGoogleMap.addMarker(markerOptions);
+					}
 					
 					markerOptions.position(point);
 		    		markerOptions.icon(BitmapDescriptorFactory.defaultMarker());
@@ -1359,9 +1381,7 @@ public class MainActivity extends FragmentActivity
 					
 		    		double atamm = Math.atan(m);
 		    		double grados = Math.toDegrees(atamm);
-		    		
-		    		
-		    		
+		    	
 		    		int x = (int) (grados);
 		    		
 		    		if (x1<x2 &&  y1<y2) {
@@ -1392,7 +1412,6 @@ public class MainActivity extends FragmentActivity
 						// TODO: handle exception
 						System.out.println(e.getMessage());
 					}
-		    		
 		    	}
 				else
 					mGoogleMap.setOnMapClickListener(null);
@@ -1863,12 +1882,12 @@ public class MainActivity extends FragmentActivity
     private void marcarPuntosDeRuta()
     {
     	rectLine = new PolylineOptions().width(10).color(Color.GREEN);
-		if(puntosDeLaRuta != null && puntosDeLaRuta.size()>0)
+		if(puntosRuta != null && puntosRuta.size()>0)
 		{
-			for (int i = 0; i < puntosDeLaRuta.size(); i++) {
-				rectLine.add(puntosDeLaRuta.get(i));
+			for (int i = 0; i < puntosRuta.size(); i++) {
+				rectLine.add(puntosRuta.get(i));
 				
-				markerOptions.position(puntosDeLaRuta.get(i));
+				markerOptions.position(puntosRuta.get(i));
 				markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW));
 				mGoogleMap.addMarker(markerOptions);
 			}
@@ -1880,6 +1899,25 @@ public class MainActivity extends FragmentActivity
 			markerOptions.position(toPosition);
     		markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_end));
 			mGoogleMap.addMarker(markerOptions);
+		}
+		else{
+			if(puntosDeLaRuta != null && puntosDeLaRuta.size()>0){
+				for (int i = 0; i < puntosDeLaRuta.size(); i++) {
+					rectLine.add(puntosDeLaRuta.get(i));
+					
+					markerOptions.position(puntosDeLaRuta.get(i));
+					markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW));
+					mGoogleMap.addMarker(markerOptions);
+				}
+				mGoogleMap.addPolyline(rectLine);
+				markerOptions.position(fromPosition);
+				markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_start));
+	    		mGoogleMap.addMarker(markerOptions);
+				
+				markerOptions.position(toPosition);
+	    		markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_end));
+				mGoogleMap.addMarker(markerOptions);
+			}
 		}
     }
     private void llenarPuntosFavoritos()
