@@ -598,6 +598,19 @@ public class MainActivity extends FragmentActivity
 				ArrayList<LatLng> listPoint;
 				
 				puntosDeLaRuta = getRoute.get_route(fromPosition,toPosition,getPointsMap(puntosDeBloqueo));
+				if (getRoute.postList == 1) {
+					getRoute.postList = 2;
+				}
+				else{
+					if (getRoute.postList == 2) {
+						getRoute.postList = 3;
+					}
+					else{
+						if (getRoute.postList == 3) {
+							getRoute.postList = 1;
+						}
+					}
+				}
 				
 				if(puntosDeLaRuta!=null)
 				{
@@ -1911,6 +1924,7 @@ public class MainActivity extends FragmentActivity
 				rectLine.add(puntosRuta.get(i));
 				
 				markerOptions.position(puntosRuta.get(i));
+				markerOptions.title("pos: "+i);
 				markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW));
 				mGoogleMap.addMarker(markerOptions);
 			}
@@ -1933,6 +1947,7 @@ public class MainActivity extends FragmentActivity
 					rectLine.add(puntosDeLaRuta.get(i));
 					
 					markerOptions.position(puntosDeLaRuta.get(i));
+					markerOptions.title("pos: "+i);
 					markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW));
 					mGoogleMap.addMarker(markerOptions);
 				}

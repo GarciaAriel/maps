@@ -16,15 +16,17 @@ public class getRouteTask2 {
 	private int distanceToThePointOnLockPoint=200;//verifica la cercania del nuevo punto medio a los puntos de bloqueo
 	private int distanceToMoveAwayThePointLock = 200;
 	
+	public int postList = 1;
+	
+	GMapV2GetRouteDirection v2GetRouteDirection=new GMapV2GetRouteDirection();
+	org.w3c.dom.Document document;
+	ArrayList<LatLng> ContenedorTemporalPuntos = new ArrayList<LatLng>();
+	 
+	
 	
 	public getRouteTask2() {
 		// TODO Auto-generated constructor stub
 	}
-	GMapV2GetRouteDirection v2GetRouteDirection=new GMapV2GetRouteDirection();
-	org.w3c.dom.Document document;
-	ArrayList<LatLng> ContenedorTemporalPuntos = new ArrayList<LatLng>();
-	
-	
 	
 	public ArrayList<LatLng> get_route(LatLng fromP,LatLng toP,ArrayList<LatLng> puntosBloqueo)
 	{
@@ -38,6 +40,7 @@ public class getRouteTask2 {
 		
 		//pedir un camino y verificar si hay bloqueo serca /retorna los puntos de bloqueo {si} 
 		Map<LatLng,String> respuesta = getRouteVerifyPointsLock(fromP,toP,mapLockPoints);
+		
 		//verifica si hay algun problema [true si hay algun problema]
 		LatLng bloqueo = verificarPuntoConflicto(respuesta);
 		
@@ -73,20 +76,103 @@ public class getRouteTask2 {
 		//obtener una ruta desde inicio a fin
 		document = v2GetRouteDirection.getDocument(fromP, toP, GMapV2GetRouteDirection.MODE_DRIVING);
         ArrayList<LatLng> directionPoint;
+        ArrayList<LatLng> camino = new ArrayList<LatLng>();
+        
         Map<LatLng,String> mapPuntosBloqueo = LockPoints;
         if(document != null)
         {
         	directionPoint = v2GetRouteDirection.getDirection(document);
         	
+        	//seleccionar un solo camino
+        	
+        	double distanceComparar = GMapV2GetRouteDirection.CalculationByDistance(toP.latitude,toP.longitude,directionPoint.get(0).latitude,directionPoint.get(0).longitude);
+        	
+        	if (postList == 1) {
+        		for (int i = 1; i < directionPoint.size(); i++) {
+        			double distance = GMapV2GetRouteDirection.CalculationByDistance(toP.latitude,toP.longitude,directionPoint.get(i).latitude,directionPoint.get(i).longitude);
+            		if (distance == distanceComparar) {
+            			System.out.println("1111111111111111111111111111111111");
+            			break;
+    				}
+            		camino.add(directionPoint.get(i));
+            		
+            	}
+			}
+        	else{
+        		if (postList == 2) {
+        			int i = 1;
+            		for (; i < directionPoint.size(); i++) {
+                		double distance = GMapV2GetRouteDirection.CalculationByDistance(toP.latitude,toP.longitude,directionPoint.get(i).latitude,directionPoint.get(i).longitude);
+                		if (distance == distanceComparar) {
+                			System.out.println("22222222222222222222222222222222222222 break no uno");
+                			break;
+        				}
+                	}
+            		i+=1;
+            		for (; i < directionPoint.size(); i++) {
+            			double distance = GMapV2GetRouteDirection.CalculationByDistance(toP.latitude,toP.longitude,directionPoint.get(i).latitude,directionPoint.get(i).longitude);
+                		if (distance == distanceComparar) {
+                			System.out.println("22222222222222222222222222222222222222 break cargar dos");
+                			break;
+        				}
+                		camino.add(directionPoint.get(i));
+                	}
+            		
+    			}
+        		else{
+        			if (postList == 3) {
+            			int i = 1;
+                		for (; i < directionPoint.size(); i++) {
+                    		double distance = GMapV2GetRouteDirection.CalculationByDistance(toP.latitude,toP.longitude,directionPoint.get(i).latitude,directionPoint.get(i).longitude);
+                    		if (distance == distanceComparar) {
+                    			System.out.println("3333333333333333333333333333333333 break no uno");
+                    			break;
+            				}
+                    	}
+                		i+=1;
+                		for (; i < directionPoint.size(); i++) {
+                    		double distance = GMapV2GetRouteDirection.CalculationByDistance(toP.latitude,toP.longitude,directionPoint.get(i).latitude,directionPoint.get(i).longitude);
+                    		if (distance == distanceComparar) {
+                    			System.out.println("3333333333333333333333333333333333 break no dos");
+                    			break;
+            				}
+                    	}
+                		i+=1;
+                		if (i<directionPoint.size()) {
+                			for (; i < directionPoint.size(); i++) {
+                				double distance = GMapV2GetRouteDirection.CalculationByDistance(toP.latitude,toP.longitude,directionPoint.get(i).latitude,directionPoint.get(i).longitude);
+                        		if (distance == distanceComparar) {
+                        			System.out.println("3333333333333333333333333333333333 break add 333");
+                        			break;
+                				}
+                        		camino.add(directionPoint.get(i));
+                			}
+						}
+                		else{
+                			for (i = 1; i < directionPoint.size(); i++) {
+                        		double distance = GMapV2GetRouteDirection.CalculationByDistance(toP.latitude,toP.longitude,directionPoint.get(i).latitude,directionPoint.get(i).longitude);
+                        		if (distance == distanceComparar) {
+                        			System.out.println("3333333333333333333333333333333333 break add uno");
+                        			break;
+                				}
+                        		camino.add(directionPoint.get(i));
+                        	}
+                			postList = 2;
+                		}
+                		
+        			}
+        		}
+        	}
+        	
         	ContenedorTemporalPuntos.clear();
-        	ContenedorTemporalPuntos = directionPoint;
+        	ContenedorTemporalPuntos = camino;
       	  //if -> puntos de bloqueo >=0 tengo algo que comparar
       	  if (mapPuntosBloqueo != null || mapPuntosBloqueo.size() != 0)	  {
-      		  for (int i = 0; i < directionPoint.size(); i++) {
+      		  for (int i = 0; i < camino.size(); i++) {
       			  
       			 for (Map.Entry<LatLng, String> entry : mapPuntosBloqueo.entrySet()) {
       				LatLng temporal = entry.getKey(); 
-      				double distancia = v2GetRouteDirection.CalculationByDistance(temporal.latitude,temporal.longitude, directionPoint.get(i).latitude, directionPoint.get(i).longitude);
+      				double distancia = v2GetRouteDirection.CalculationByDistance(temporal.latitude,temporal.longitude, camino.get(i).latitude, camino.get(i).longitude);
             		if (distancia < distanceToThePointOnLockRoad){
             			entry.setValue("no");
             			return mapPuntosBloqueo;
