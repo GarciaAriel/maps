@@ -176,7 +176,6 @@ public class MainActivity extends FragmentActivity
 				}
             	
             	
-            	
             	//ocultar otro menu //mostrar otro
             	LinearLayout linear3 = (LinearLayout) findViewById(R.id.menu_options_10);
 				linear3.setVisibility(View.GONE);
@@ -445,7 +444,7 @@ public class MainActivity extends FragmentActivity
 				{
 				    public void run() 
 				    {
-				    		ayudaServicios help = new ayudaServicios();
+				    		controller help = new controller();
 					    	puntosDeAlerta = help.getPuntosAlerta();//
 					    	puntosDeBloqueo = help.getPuntosBloqueoPersistente();
 					    	puntosDeBloqueoPosibles = help.getPuntosPosiblesBloqueoPersistente();
@@ -639,17 +638,25 @@ public class MainActivity extends FragmentActivity
 //					mGoogleMap.addMarker(markerOptions);
 //				}
 				markerOptions.position(fromPosition);
-				markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_start));
+				markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.m_inicio));
 				mGoogleMap.addMarker(markerOptions);
 				
 				markerOptions.position(toPosition);
-				markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_end));
+				markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.m_fin));
 				mGoogleMap.addMarker(markerOptions);
 				
 				mGoogleMap.addPolyline(rectLine);
 		  	  	markerOptions.draggable(true);
 		  	  	mGoogleMap.addMarker(markerOptions);
-		  	  Dialog.dismiss();
+		  	  	
+		  	  	Dialog.dismiss();
+		  	  	
+		  	  	Button start_rute = (Button)findViewById(R.id._ini_ruta);
+	        	start_rute.setVisibility(View.VISIBLE);
+	        	
+	        	Button next_rute = (Button)findViewById(R.id.button1);
+	        	next_rute.setVisibility(View.VISIBLE);
+	        	
 			} catch (Exception e) {
 				Dialog = new ProgressDialog(MainActivity.this);
                 Dialog.setMessage("en post execute");
@@ -1001,7 +1008,7 @@ public class MainActivity extends FragmentActivity
             	//marker
             		MarkerOptions options = new MarkerOptions();
                 	options.position(Position);
-                	options.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_start));
+                	options.icon(BitmapDescriptorFactory.fromResource(R.drawable.m_inicio));
                 	//options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
                 	mGoogleMap.addMarker(options);
                 	//marcarPuntos();
@@ -1137,11 +1144,11 @@ public class MainActivity extends FragmentActivity
         					//color marker
         				if(markerPoints.size()==1){
         					Toast.makeText(context, "Seleccione el punto destino", Toast.LENGTH_LONG).show();
-        					options.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_start));
+        					options.icon(BitmapDescriptorFactory.fromResource(R.drawable.m_inicio));
         				}
         				else{ 
         					if(markerPoints.size()==2){
-        						options.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_end));
+        						options.icon(BitmapDescriptorFactory.fromResource(R.drawable.m_fin));
         					}
         				}
         					// Add marker al map
@@ -1171,6 +1178,9 @@ public class MainActivity extends FragmentActivity
         		        	//boton visible iniciar ruta
         		        	Button start_rute = (Button)findViewById(R.id._ini_ruta);
         		        	start_rute.setVisibility(View.VISIBLE);
+        		        	
+        		        	Button next_rute = (Button)findViewById(R.id.button1);
+        		        	next_rute.setVisibility(View.VISIBLE);
         		        }
         				
         				
@@ -1194,6 +1204,9 @@ public class MainActivity extends FragmentActivity
         		
                 Button start_rute = (Button)findViewById(R.id._ini_ruta);
 	        	start_rute.setVisibility(View.INVISIBLE);
+	        	
+	        	Button next_rute = (Button)findViewById(R.id.button1);
+	        	next_rute.setVisibility(View.INVISIBLE);
 	        	
 	             //ver al inicio los puntos debloqueo
 
@@ -1232,6 +1245,9 @@ public class MainActivity extends FragmentActivity
     	//boton visible iniciar ruta
     	Button start_rute = (Button)findViewById(R.id._ini_ruta);
     	start_rute.setVisibility(View.VISIBLE);
+    	
+    	Button next_rute = (Button)findViewById(R.id.button1);
+    	next_rute.setVisibility(View.VISIBLE);
     }
     
     public void iniciar_recorrido(final View v)
@@ -1253,13 +1269,24 @@ public class MainActivity extends FragmentActivity
 			}
 		}
 		
+		double latitude = mGoogleMap.getMyLocation().getLatitude();
+		double longitude = mGoogleMap.getMyLocation().getLongitude();
+		LatLng myPos = new LatLng(latitude, longitude);
+		CameraPosition cameraPosition2 = new CameraPosition.Builder().target(myPos).zoom(19).bearing(0).tilt(45).build();
+        mGoogleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition2));
+		
     	mGoogleMap.setOnMapClickListener(new OnMapClickListener(){
 			
+    		
+    		
 			@Override
 			public void onMapClick(LatLng point) 
 			{
 				
 				if (puntosRuta.size() > 0) {
+					
+					
+					
 					before = null;
 					after = null;
 					GMapV2GetRouteDirection route = new GMapV2GetRouteDirection();
@@ -1386,20 +1413,20 @@ public class MainActivity extends FragmentActivity
 							}
 						}
 					
-					markerOptions.position(punto2);
-					markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_blue_home));
-					mGoogleMap.addMarker(markerOptions);
+//					markerOptions.position(punto2);
+//					markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_blue_home));
+//					mGoogleMap.addMarker(markerOptions);
 					
 					if (before !=null) {
-						markerOptions.position(before);
-						markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_yellow_policia));
-			    		mGoogleMap.addMarker(markerOptions);
+//						markerOptions.position(before);
+//						markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_yellow_policia));
+//			    		mGoogleMap.addMarker(markerOptions);
 					}
 					
 					if (after !=null) {
-						markerOptions.position(after);
-						markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_red_school));
-						mGoogleMap.addMarker(markerOptions);
+//						markerOptions.position(after);
+//						markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_red_school));
+//						mGoogleMap.addMarker(markerOptions);
 					}
 					
 					markerOptions.position(point);
@@ -1555,7 +1582,7 @@ public class MainActivity extends FragmentActivity
 					//mGoogleMap.clear();
 					MarkerOptions options = new MarkerOptions();
 					options.position(point);
-					options.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_yellow_accidente_alert));
+					options.icon(BitmapDescriptorFactory.fromResource(R.drawable.m_a_n_accidente));
 					mGoogleMap.addMarker(options);
 					
 					double latitude = mGoogleMap.getMyLocation().getLatitude();
@@ -1565,7 +1592,7 @@ public class MainActivity extends FragmentActivity
             		double distancia = auxiliary.CalculationByDistance(latitude, longitude, point.latitude, point.longitude);
 					if (distancia < 300) {
 						try {
-							ayudaServicios servicios = new ayudaServicios();
+							controller servicios = new controller();
 							servicios.guardarPuntoAlerta("Accidente", codigo_usuario, point.latitude,point.longitude);
 							//marcarPuntos();
 							
@@ -1596,7 +1623,7 @@ public class MainActivity extends FragmentActivity
 					//mGoogleMap.clear();
 					MarkerOptions options = new MarkerOptions();
 					options.position(point);
-					options.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_yellow_policia_alert));
+					options.icon(BitmapDescriptorFactory.fromResource(R.drawable.m_a_n_redada));
 					mGoogleMap.addMarker(options);
 					
 					double latitude = mGoogleMap.getMyLocation().getLatitude();
@@ -1606,7 +1633,7 @@ public class MainActivity extends FragmentActivity
             		double distancia = auxiliary.CalculationByDistance(latitude, longitude, point.latitude, point.longitude);
 					if (distancia < 300) {
 						try {
-							ayudaServicios servicios = new ayudaServicios();
+							controller servicios = new controller();
 							servicios.guardarPuntoAlerta("Redada", codigo_usuario, point.latitude,point.longitude);
 							//marcarPuntos();
 						} catch (Exception e) {
@@ -1637,12 +1664,12 @@ public class MainActivity extends FragmentActivity
 					//mGoogleMap.clear();
 					MarkerOptions options = new MarkerOptions();
 					options.position(point);
-					options.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_rosado_market));
+					options.icon(BitmapDescriptorFactory.fromResource(R.drawable.m_r_mercado));
 //					options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
 					mGoogleMap.addMarker(options);
 					
 						try {
-							ayudaServicios servicios = new ayudaServicios();
+							controller servicios = new controller();
 							servicios.guardarPuntoBloqueo("Mercado",codigo_usuario, point.latitude,point.longitude);
 							//marcarPuntos();
 						} catch (Exception e) {
@@ -1665,11 +1692,11 @@ public class MainActivity extends FragmentActivity
 					//mGoogleMap.clear();
 					MarkerOptions options = new MarkerOptions();
 					options.position(point);
-					options.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_rosado_school));
+					options.icon(BitmapDescriptorFactory.fromResource(R.drawable.m_r_colegio));
 //					options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
 					mGoogleMap.addMarker(options);
 						try {
-							ayudaServicios servicios = new ayudaServicios();
+							controller servicios = new controller();
 							servicios.guardarPuntoBloqueo("Colegio",codigo_usuario, point.latitude,point.longitude);
 							//marcarPuntos();
 						} catch (Exception e) {
@@ -1691,7 +1718,7 @@ public class MainActivity extends FragmentActivity
 					//mGoogleMap.clear();
 					MarkerOptions options = new MarkerOptions();
 					options.position(point);
-					options.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_yellow_trafico_alert));
+					options.icon(BitmapDescriptorFactory.fromResource(R.drawable.m_a_n_trafico));
 //					options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW));
 					mGoogleMap.addMarker(options);
 					
@@ -1702,7 +1729,7 @@ public class MainActivity extends FragmentActivity
             		double distancia = auxiliary.CalculationByDistance(latitude, longitude, point.latitude, point.longitude);
 					if (distancia < 300) {
 						try {
-							ayudaServicios servicios = new ayudaServicios();
+							controller servicios = new controller();
 							servicios.guardarPuntoAlerta("Trafico", codigo_usuario, point.latitude,point.longitude);
 							//marcarPuntos();
 						} catch (Exception e) {
@@ -1735,12 +1762,12 @@ public class MainActivity extends FragmentActivity
 					home = point;
 					MarkerOptions options = new MarkerOptions();
 					options.position(point);
-					options.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_blue_home));
+					options.icon(BitmapDescriptorFactory.fromResource(R.drawable.m_f_casa));
 					mGoogleMap.addMarker(options);
 					homeFalse = "oto";
 					
 					try {
-						ayudaServicios servicios = new ayudaServicios();
+						controller servicios = new controller();
 						servicios.guardarPunto("Casa", codigo_usuario, home.latitude,home.longitude);
 						//marcarPuntos();
 					} catch (Exception e) {
@@ -1758,12 +1785,12 @@ public class MainActivity extends FragmentActivity
 					work = point;
 					MarkerOptions options = new MarkerOptions();
 					options.position(point);
-					options.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_blue_work));
+					options.icon(BitmapDescriptorFactory.fromResource(R.drawable.m_f_trabajo));
 					mGoogleMap.addMarker(options);
 					workFalse = "oto";
 					
 					try {
-						ayudaServicios servicios = new ayudaServicios();
+						controller servicios = new controller();
 						servicios.guardarPunto("Trabajo", codigo_usuario, work.latitude,work.longitude);
 						//marcarPuntos();
 					} catch (Exception e) {
@@ -1785,14 +1812,14 @@ public class MainActivity extends FragmentActivity
     	if(home!=null ) 	
     	{
 			markerOptions.position(home);
-    		markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_blue_home));
+    		markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.m_f_casa));
     		markerOptions.snippet("Casa");
 			mGoogleMap.addMarker(markerOptions);
 		}
 		if(work!=null ) 	
     	{
 			markerOptions.position(work);
-			markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_blue_work));
+			markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.m_f_trabajo));
 			markerOptions.snippet("Trabajo");
 			mGoogleMap.addMarker(markerOptions);
     	}
@@ -1805,14 +1832,14 @@ public class MainActivity extends FragmentActivity
 				markerOptions.position(entry.getKey());
 				if (entry.getValue().equals("Colegio")) 
 				{
-					markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_red_school));
+					markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.m_b_colegio));
 					markerOptions.title("Bloqueo");
 					markerOptions.snippet("Colegio");
 					mGoogleMap.addMarker(markerOptions);
 				}
 				else
 				{
-					markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_red_market));
+					markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.m_b_mercado));
 					markerOptions.title("Bloqueo");
 					markerOptions.snippet("Mercado");
 					mGoogleMap.addMarker(markerOptions);
@@ -1827,14 +1854,14 @@ public class MainActivity extends FragmentActivity
 				markerOptions.position(entry.getKey());
 				if (entry.getValue().equals("Colegio")) 
 				{
-					markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_rosado_school));
+					markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.m_r_colegio));
 					markerOptions.title("Bloqueo");
 					markerOptions.snippet("Colegio");
 					mGoogleMap.addMarker(markerOptions);
 				}
 				else
 				{
-					markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_rosado_market));
+					markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.m_r_mercado));
 					markerOptions.title("Bloqueo");
 					markerOptions.snippet("Mercado");
 					mGoogleMap.addMarker(markerOptions);
@@ -1868,11 +1895,11 @@ public class MainActivity extends FragmentActivity
 					if (entry.getValue().equals("Accidente")) 
 					{
 						if (list!=null && list.size()>0 && list.containsKey(entry.getKey())) {
-							marke.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_yellow_accidente_alert));
+							marke.icon(BitmapDescriptorFactory.fromResource(R.drawable.m_a_n_accidente));
 						}
 						else
 						{
-							marke.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_yellow_accidente));
+							marke.icon(BitmapDescriptorFactory.fromResource(R.drawable.m_a_accidente));
 						}
 						marke.snippet("Accidente");
 					}
@@ -1880,25 +1907,26 @@ public class MainActivity extends FragmentActivity
 					{
 						if (entry.getValue().equals("Trafico")) {
 							if (list!=null && list.size()>0 && list.containsKey(entry.getKey())) {
-								marke.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_yellow_trafico_alert));
+								marke.icon(BitmapDescriptorFactory.fromResource(R.drawable.m_a_n_trafico));
 							}
 							else
 							{
-								marke.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_yellow_trafico));
+								marke.icon(BitmapDescriptorFactory.fromResource(R.drawable.m_a_trafico));
 							}
 							
 							marke.snippet("Trafico");
 						}
 						else
 						{
-							if (list!=null && list.size()>0 && list.containsKey(entry.getKey())) {
-								marke.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_yellow_policia_alert));
+							if (entry.getValue().equals("Redada")){
+								if (list!=null && list.size()>0 && list.containsKey(entry.getKey())) {
+									marke.icon(BitmapDescriptorFactory.fromResource(R.drawable.m_a_n_redada));
+								}
+								else
+								{
+									marke.icon(BitmapDescriptorFactory.fromResource(R.drawable.m_a_redada));
+								}
 							}
-							else
-							{
-								marke.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_yellow_policia));
-							}
-							
 							marke.snippet("Redada");
 						}
 					}
@@ -1931,11 +1959,11 @@ public class MainActivity extends FragmentActivity
 			
 			mGoogleMap.addPolyline(rectLine);
 			markerOptions.position(fromPosition);
-			markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_start));
+			markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.m_inicio));
     		mGoogleMap.addMarker(markerOptions);
 			
 			markerOptions.position(toPosition);
-    		markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_end));
+    		markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.m_fin));
 			mGoogleMap.addMarker(markerOptions);
 		}
 		else{
@@ -1953,11 +1981,11 @@ public class MainActivity extends FragmentActivity
 				}
 				mGoogleMap.addPolyline(rectLine);
 				markerOptions.position(fromPosition);
-				markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_start));
+				markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.m_inicio));
 	    		mGoogleMap.addMarker(markerOptions);
 				
 				markerOptions.position(toPosition);
-	    		markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_end));
+	    		markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.m_fin));
 				mGoogleMap.addMarker(markerOptions);
 			}
 		}
@@ -1967,7 +1995,7 @@ public class MainActivity extends FragmentActivity
     	JSONArray puntoCasaJson= null;
     	JSONArray puntoTrabajoJson= null;
     	
-    	ayudaServicios aux = new ayudaServicios();
+    	controller aux = new controller();
     	puntoCasaJson = aux.getPunto("Casa", codigo_usuario);
     	puntoTrabajoJson = aux.getPunto("Trabajo", codigo_usuario);
     	

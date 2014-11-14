@@ -12,10 +12,11 @@
          android:layout_height="match_parent"
          android:orientation="vertical" 
          android:textColor="#FFFFFF"
-         android:background="#FFFFFF"
+         android:background="#000000"
          android:id="@+id/menu_options">
         
          <TextView  
+            android:textColor="#FFFFFF"
 		    android:layout_width="fill_parent" 
 		    android:text="LUGARES FAVORITOS" 
 		    android:layout_height="wrap_content" 
@@ -32,7 +33,7 @@
         	<Button
         	    android:layout_marginRight="10dp"
         	    android:layout_marginLeft="10dp"
-        	    android:background="@drawable/ic_home"
+        	    android:background="@drawable/favorito_casa"
         	    android:id="@+id/button10"
         	    android:layout_width="50dp"
         	    android:layout_height="50dp"
@@ -46,7 +47,7 @@
         	    android:layout_marginRight="10dp"
         	    android:layout_marginLeft="10dp"
         	    android:id="@+id/button11"
-        	    android:background="@drawable/ic_work"
+        	    android:background="@drawable/favorito_travajo"
         	    android:layout_width="50dp"
         	    android:layout_height="50dp"
         	    android:layout_alignParentBottom="true"
@@ -57,11 +58,12 @@
         
        <!-- segundooooooooooooooooooooooooooooooooooooooo -->>
        
-                <TextView  
+            <TextView  
 		    android:layout_width="fill_parent" 
 		    android:text="ENVIAR ALERTA" 
 		    android:layout_height="wrap_content" 
 		    android:id="@+id/TextView02"
+		    android:textColor="#FFFFFF"
 		    />
          
          <LinearLayout
@@ -73,7 +75,7 @@
 	        android:id="@+id/menu_options_2">
 
         	<Button
-        	    android:background="@drawable/ic_accident"
+        	    android:background="@drawable/alert_accident"
         	    android:layout_marginRight="10dp"
         	    android:layout_marginLeft="10dp"
         	    android:id="@+id/button13"
@@ -85,7 +87,7 @@
         	    android:text="" />
 
         	<Button
-        	    android:background="@drawable/ic_traffic"
+        	    android:background="@drawable/alert_trafic"
         	    android:layout_marginRight="10dp"
         	    android:layout_marginLeft="10dp"
         	    android:id="@+id/button14"
@@ -97,7 +99,7 @@
         	    android:text="" />
 
         	<Button
-        	    android:background="@drawable/ic_raid"
+        	    android:background="@drawable/alert_redada"
         	    android:layout_marginRight="10dp"
         	    android:layout_marginLeft="10dp"
         	    android:id="@+id/button15"
@@ -115,7 +117,8 @@
 		    android:layout_width="fill_parent" 
 		    android:text="PUNTOS DE BLOQUEO" 
 		    android:layout_height="wrap_content" 
-		    android:id="@+id/TextView03"/>
+		    android:id="@+id/TextView03"
+		    android:textColor="#FFFFFF"/>
          
          <LinearLayout
 	        android:layout_width="wrap_content"
@@ -126,7 +129,7 @@
 	        android:id="@+id/menu_options_3">
 
         	<Button
-        	    android:background="@drawable/ic_market"
+        	    android:background="@drawable/lock_mercado"
         	    android:layout_marginRight="10dp"
         	    android:layout_marginLeft="10dp"
         	    android:id="@+id/button16"
@@ -138,7 +141,7 @@
         	    android:text="" />
 
         	<Button
-        	    android:background="@drawable/ic_school"
+        	    android:background="@drawable/lock_colegio"
         	    android:layout_marginRight="10dp"
         	    android:layout_marginLeft="10dp"
         	    android:id="@+id/button17"
@@ -159,7 +162,8 @@
 		    android:layout_width="fill_parent" 
 		    android:text="OPCIONES DE DIBUJO DE UNA RUTA" 
 		    android:layout_height="wrap_content" 
-		    android:id="@+id/TextView10"/>
+		    android:id="@+id/TextView10"
+		    android:textColor="#FFFFFF"/>
          
          <LinearLayout
 	        android:layout_width="wrap_content"
@@ -172,7 +176,7 @@
         	<Button
         	    android:layout_marginRight="10dp"
         	    android:layout_marginLeft="10dp"
-        	    android:background="@drawable/marker_one"
+        	    android:background="@drawable/draw_uno"
         	    android:id="@+id/button31"
         	    android:layout_width="100dp"
         	    android:layout_height="100dp"
@@ -186,7 +190,7 @@
         	    android:layout_marginRight="10dp"
         	    android:layout_marginLeft="10dp"
         	    android:id="@+id/button32"
-        	    android:background="@drawable/marker_two"
+        	    android:background="@drawable/draw_dos"
         	    android:layout_width="100dp"
         	    android:layout_height="100dp"
         	    android:layout_alignParentBottom="true"
@@ -213,20 +217,10 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="#FFFFFF"
+            android:background="#000000"
             android:orientation="horizontal" >
-
-            <Button
-                android:id="@+id/activity_main_content_button_menu"
-                android:layout_width="46dp"
-                android:layout_height="43dp"
-                android:background="@drawable/ic_menu"
-                android:onClick="toggleMenu"
-                android:paddingBottom="4dp"
-                android:paddingLeft="4dp"
-                android:paddingRight="4dp"
-                android:paddingTop="4dp" />
-
+        	
+            
             <TextView
                 android:id="@+id/activity_main_content_title"
                 android:layout_width="0dp"
@@ -237,35 +231,57 @@
                 android:visibility="gone" />
 
             <Button
+                android:id="@+id/activity_main_content_button_menu"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:layout_marginRight="30dp"
+                android:background="@drawable/menu_inicio"
+                android:onClick="toggleMenu"
+                android:paddingBottom="5dp"
+                android:paddingLeft="5dp"
+                android:paddingRight="5dp"
+                android:paddingTop="5dp" />
+
+            <Button
                 android:id="@+id/button1"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_weight="16.21"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_marginRight="30dp"
+                android:background="@drawable/menu_siguiente"
                 android:onClick="siguiente_camino"
-                android:text="Button" />
+                android:paddingBottom="5dp"
+                android:paddingLeft="5dp"
+                android:paddingRight="5dp"
+                android:paddingTop="5dp"
+                android:visibility="invisible" />
 
             <Button
                 android:id="@+id/_ini_ruta"
-                android:layout_width="120dp"
-                android:layout_height="wrap_content"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_marginRight="30dp"
+                android:background="@drawable/menu_iniciar"
                 android:onClick="iniciar_recorrido"
-                android:text="Iniciar el Viaje"
+                android:paddingBottom="5dp"
+                android:paddingLeft="5dp"
+                android:paddingRight="5dp"
+                android:paddingTop="5dp"
                 android:visibility="invisible" />
 
             <ToggleButton
                 android:id="@+id/toggleButton1"
-                android:layout_width="55dp"
-                android:layout_height="match_parent"
-                android:layout_alignParentRight="true"
-                android:layout_weight="0.05"
                 android:background="@drawable/check"
                 android:checked="false"
-                android:gravity="right"
+                
                 android:onClick="methodChangeMode"
-                android:text=""
-                android:textColorLink="@android:color/black"
-                android:textOff=" "
-                android:textOn=" " />
+                
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:paddingBottom="5dp"
+                android:paddingLeft="5dp"
+                android:paddingRight="5dp"
+                android:paddingTop="5dp" 
+                android:layout_marginRight="30dp"/>
 
         </LinearLayout>
 

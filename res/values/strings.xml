@@ -7,6 +7,7 @@
     <string name="sub_menu">LUGARES FAVORITOS</string>
     <string name="sub_menu2">REPORTAR PUNTO CONFLICTIVO</string>
     <string name="sub_menu3">ALERTAS</string>
+    <string name="color_white">FFFFFF</string>
     
 
 </resources>
